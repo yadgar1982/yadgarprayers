@@ -1503,7 +1503,7 @@ useEffect(() => {
             className="shrink-0 text-[#e8a66b] group-hover:scale-110"
           />
           <span className="whitespace-nowrap font-serif text-xs font-medium">
-            Islamic Books
+           Books
           </span>
         </button>
 

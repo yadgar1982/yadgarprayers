@@ -1,293 +1,452 @@
 
-import { useEffect, useState, useCallback } from "react";
-import {
-  Compass,
-  MapPin,
-  LocateFixed,
-  AlertCircle,
-} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
-const KAABA_LAT = 21.4225;
-const KAABA_LNG = 39.8262;
+const KAABA = { lat: 21.4225, lon: 39.8262 };
 
-function calculateQiblaBearing(latitude, longitude) {
-  const lat1 = (latitude * Math.PI) / 180;
-  const lat2 = (KAABA_LAT * Math.PI) / 180;
-  const deltaLng = ((KAABA_LNG - longitude) * Math.PI) / 180;
+const rad = (v) => (v * Math.PI) / 180;
+const normalize = (v) => ((v % 360) + 360) % 360;
 
-  const y = Math.sin(deltaLng);
+function getQibla(lat, lon) {
+  const lat1 = rad(lat);
+  const lat2 = rad(KAABA.lat);
+  const dLon = rad(KAABA.lon - lon);
+
+  const y = Math.sin(dLon) * Math.cos(lat2);
   const x =
-    Math.cos(lat1) * Math.tan(lat2) -
-    Math.sin(lat1) * Math.cos(deltaLng);
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
 
-  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+  return normalize(Math.atan2(y, x) * 180 / Math.PI);
+}
+
+function getDistance(lat, lon) {
+  const R = 6371;
+  const dLat = rad(KAABA.lat - lat);
+  const dLon = rad(KAABA.lon - lon);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(rad(lat)) *
+      Math.cos(rad(KAABA.lat)) *
+      Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Detailed Kaaba illustration
+function Kaaba({ size = 58 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 120 120">
+      {/* Top */}
+      <path
+        d="M10 35 L59 8 L110 35 L60 63 Z"
+        fill="#303030"
+        stroke="#D6B45D"
+        strokeWidth="2"
+      />
+
+      {/* Left face */}
+      <path
+        d="M10 35 L60 63 V108 L10 80 Z"
+        fill="#080808"
+        stroke="#C8A34F"
+        strokeWidth="2"
+      />
+
+      {/* Right face */}
+      <path
+        d="M60 63 L110 35 V80 L60 108 Z"
+        fill="#181818"
+        stroke="#C8A34F"
+        strokeWidth="2"
+      />
+
+      {/* Gold Kiswah belt */}
+      <path
+        d="M10 46 L60 74 L110 46"
+        stroke="#EBCB72"
+        strokeWidth="7"
+      />
+
+      <path
+        d="M10 52 L60 80 L110 52"
+        stroke="#B18A3C"
+        strokeWidth="2"
+      />
+
+      {/* Decorative gold embroidery */}
+      <path
+        d="M25 53 L25 59 M34 58 L34 64 M43 63 L43 69"
+        stroke="#F4DA91"
+        strokeWidth="2"
+      />
+
+      {/* Golden door */}
+      <path
+        d="M74 73 L95 62 V85 L74 97 Z"
+        fill="#B98D38"
+        stroke="#F5D88B"
+        strokeWidth="2"
+      />
+
+      <path
+        d="M80 75 L89 70 V82 L80 88 Z"
+        fill="#F2D58B"
+      />
+    </svg>
+  );
+}
+
+// Four-direction compass rose
+function CompassRose({ heading }) {
+  return (
+    <div
+      className="absolute inset-0"
+      style={{
+        transform: `rotate(${-heading}deg)`,
+        transition: "transform 180ms linear",
+      }}
+    >
+      <svg viewBox="0 0 320 320" className="h-full w-full">
+        {/* Compass points */}
+        <g
+          stroke="#D8F3DF"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        >
+          <path
+            d="M160 38 L177 144 L160 160 L143 144 Z"
+            fill="#2FA65D"
+          />
+          <path
+            d="M282 160 L176 177 L160 160 L176 143 Z"
+            fill="#248F50"
+          />
+          <path
+            d="M160 282 L143 176 L160 160 L177 176 Z"
+            fill="#2FA65D"
+          />
+          <path
+            d="M38 160 L144 143 L160 160 L144 177 Z"
+            fill="#248F50"
+          />
+        </g>
+
+        {/* Inner details */}
+        <circle
+          cx="160"
+          cy="160"
+          r="29"
+          fill="#319E5B"
+          fillOpacity=".25"
+          stroke="#299653"
+          strokeWidth="2"
+        />
+
+        {/* Center pivot */}
+        <circle
+          cx="160"
+          cy="160"
+          r="11"
+          fill="#39D45E"
+          stroke="white"
+          strokeWidth="3"
+        />
+
+        {/* Cardinal directions */}
+        <g
+          fontSize="17"
+          fontWeight="bold"
+          textAnchor="middle"
+          fill="#E33B42"
+        >
+          <text x="160" y="24">N</text>
+          <text x="297" y="166">E</text>
+          <text x="160" y="307">S</text>
+          <text x="23" y="166">W</text>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+// Kaaba moves independently around the compass
+function QiblaMarker({ angle }) {
+  return (
+    <div
+      className="absolute inset-0 z-30 pointer-events-none"
+      style={{
+        transform: `rotate(${angle}deg)`,
+        transition: "transform 180ms linear",
+      }}
+    >
+      <div className="absolute left-1/2 top-1/2">
+        <div
+          className="absolute left-0 top-0"
+          style={{
+            transform: "translate(-50%, -50%) translateY(-128px)",
+          }}
+        >
+          <div
+            className="flex h-[65px] w-[65px] items-center justify-center rounded-xl border-2 border-amber-400 bg-white shadow-[0_5px_15px_rgba(0,0,0,0.25)]"
+            style={{
+              transform: `rotate(${-angle}deg)`,
+            }}
+          >
+            <Kaaba size={59} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function QiblaCompass() {
   const [location, setLocation] = useState(null);
-  const [bearing, setBearing] = useState(null);
   const [heading, setHeading] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [qibla, setQibla] = useState(null);
+  const [distance, setDistance] = useState(null);
   const [error, setError] = useState("");
-  const [sensorEnabled, setSensorEnabled] = useState(false);
+  const [active, setActive] = useState(false);
 
-  const getLocation = useCallback(() => {
+  const listenerRef = useRef(null);
+  const eventRef = useRef(null);
+
+  // Live location
+  useEffect(() => {
     if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
+      setError("Location is not supported by your browser.");
       return;
     }
 
-    setLoading(true);
-    setError("");
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+    const watch = navigator.geolocation.watchPosition(
+      ({ coords }) => {
+        const { latitude, longitude } = coords;
 
         setLocation({ latitude, longitude });
-        setBearing(calculateQiblaBearing(latitude, longitude));
-        setLoading(false);
+        setQibla(getQibla(latitude, longitude));
+        setDistance(getDistance(latitude, longitude));
       },
-      (err) => {
-        setLoading(false);
-
-        if (err.code === 1) {
-          setError(
-            "Location permission was denied. Please allow location access."
-          );
-        } else if (err.code === 2) {
-          setError("Your current location could not be determined.");
-        } else {
-          setError("Location request timed out. Please try again.");
-        }
-      },
+      () => setError("Please allow location access."),
       {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000,
+        maximumAge: 3000,
+        timeout: 20000,
       }
     );
+
+    return () => navigator.geolocation.clearWatch(watch);
   }, []);
 
+  // Enable orientation sensor
   const enableCompass = async () => {
     setError("");
 
     try {
-      // Request permission on iPhone Safari when required.
+      if (!window.DeviceOrientationEvent) {
+        throw new Error("Compass sensor is unavailable.");
+      }
+
       if (
-        typeof DeviceOrientationEvent !== "undefined" &&
         typeof DeviceOrientationEvent.requestPermission === "function"
       ) {
-        const permission =
+        const result =
           await DeviceOrientationEvent.requestPermission();
 
-        if (permission !== "granted") {
-          setError(
-            "Compass permission was not granted. Please allow motion and orientation access."
-          );
-          return;
+        if (result !== "granted") {
+          throw new Error("Motion permission was denied.");
         }
       }
 
-      if (typeof DeviceOrientationEvent === "undefined") {
-        setError("Your browser does not support a device compass.");
-        return;
-      }
+      if (listenerRef.current) return;
 
-      setSensorEnabled(true);
+      const eventName =
+        "ondeviceorientationabsolute" in window
+          ? "deviceorientationabsolute"
+          : "deviceorientation";
+
+      const handler = (event) => {
+        let value = null;
+
+        if (typeof event.webkitCompassHeading === "number") {
+          value = event.webkitCompassHeading;
+        } else if (typeof event.alpha === "number") {
+          value = normalize(360 - event.alpha);
+        }
+
+        if (value !== null) {
+          setHeading(normalize(value));
+        }
+      };
+
+      listenerRef.current = handler;
+      eventRef.current = eventName;
+
+      window.addEventListener(eventName, handler, true);
+      setActive(true);
     } catch (err) {
-      setError(
-        "Unable to access the compass. Please check your device permissions."
-      );
+      setError(err.message || "Unable to activate compass.");
     }
   };
 
   useEffect(() => {
-    getLocation();
-  }, [getLocation]);
-
-  useEffect(() => {
-    if (!sensorEnabled) return;
-
-    const handleOrientation = (event) => {
-      let direction = null;
-
-      // iPhone Safari provides a compass heading directly.
-      if (typeof event.webkitCompassHeading === "number") {
-        direction = event.webkitCompassHeading;
-      }
-      // Use alpha only when the browser confirms absolute orientation.
-      else if (
-        event.absolute === true &&
-        typeof event.alpha === "number"
-      ) {
-        direction = 360 - event.alpha;
-      }
-
-      if (direction !== null && Number.isFinite(direction)) {
-        setHeading((direction + 360) % 360);
-      }
-    };
-
-    window.addEventListener("deviceorientation", handleOrientation);
-    window.addEventListener(
-      "deviceorientationabsolute",
-      handleOrientation
-    );
-
     return () => {
-      window.removeEventListener("deviceorientation", handleOrientation);
-      window.removeEventListener(
-        "deviceorientationabsolute",
-        handleOrientation
-      );
+      if (listenerRef.current && eventRef.current) {
+        window.removeEventListener(
+          eventRef.current,
+          listenerRef.current,
+          true
+        );
+      }
     };
-  }, [sensorEnabled]);
+  }, []);
 
-  const compassRotation =
-    bearing !== null && heading !== null
-      ? bearing - heading
-      : bearing ?? 0;
+  // Relative Qibla direction
+  const relativeQibla =
+    heading !== null && qibla !== null
+      ? normalize(qibla - heading)
+      : qibla ?? 0;
 
-  const dialRotation = heading !== null ? -heading : 0;
+  const aligned =
+    heading !== null &&
+    qibla !== null &&
+    Math.min(
+      normalize(qibla - heading),
+      normalize(heading - qibla)
+    ) <= 5;
 
   return (
-    <section className="mx-auto w-full max-w-2xl rounded-2xl border border-[#c5a45e]/60 bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-5 shadow-lg sm:p-7">
-      <div className="text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#c5a45e]/60 bg-[#174b3a] text-[#e8c879]">
-          <Compass size={25} strokeWidth={1.5} />
-        </div>
+    <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-b from-white to-emerald-50 p-5 shadow-xl">
 
-        <h2 className="font-serif text-2xl font-semibold text-[#174b3a]">
+      {/* Header */}
+      <div className="mb-5 text-center">
+        <p className="text-xs font-bold tracking-[3px] text-emerald-700">
+          ISLAMIC COMPASS
+        </p>
+
+        <h2 className="mt-2 text-2xl font-bold text-emerald-950">
           Qibla Direction
         </h2>
 
-        <p className="mt-1 text-sm text-[#927d5c]">
+        <p className="mt-1 text-sm text-gray-500">
           Find the direction of the Holy Kaaba
         </p>
       </div>
 
-      <div className="mt-7 flex justify-center">
-        <div className="relative flex h-64 w-64 items-center justify-center rounded-full border-[7px] border-[#c5a45e] bg-[#174b3a] shadow-[0_0_0_5px_#eadbb7,0_8px_20px_rgba(0,0,0,0.18)]">
+      {/* Main compass */}
+      <div className="relative mx-auto aspect-square w-full max-w-[330px]">
 
-          {/* Rotating compass dial and North marker */}
+        {/* Outer border */}
+        <div className="absolute inset-0 rounded-full border-[9px] border-emerald-700 bg-white shadow-lg">
+          <div className="absolute inset-[5px] rounded-full border-2 border-emerald-100" />
+
+          {/* Degree marks */}
           <div
-            className="absolute inset-3 rounded-full border border-[#d8bd78]/50 transition-transform duration-300"
-            style={{ transform: `rotate(${dialRotation}deg)` }}
-          >
-            <span className="absolute left-1/2 top-1 -translate-x-1/2 font-serif text-sm font-bold text-white">
-              N
-            </span>
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                "repeating-conic-gradient(#527a69 0deg 1deg, transparent 1deg 15deg)",
+              maskImage:
+                "radial-gradient(transparent 0 91%, black 92% 94%, transparent 95%)",
+              WebkitMaskImage:
+                "radial-gradient(transparent 0 91%, black 92% 94%, transparent 95%)",
+            }}
+          />
 
-            <div className="absolute left-1/2 top-5 -translate-x-1/2">
-              <div className="h-0 w-0 border-x-[6px] border-b-[10px] border-x-transparent border-b-white" />
-            </div>
+          {/* Rotating cardinal compass */}
+          <CompassRose heading={heading ?? 0} />
 
-            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 font-serif text-sm text-[#f5df9d]">
-              S
-            </span>
-
-            <span className="absolute right-1 top-1/2 -translate-y-1/2 font-serif text-sm text-[#f5df9d]">
-              E
-            </span>
-
-            <span className="absolute left-1 top-1/2 -translate-y-1/2 font-serif text-sm text-[#f5df9d]">
-              W
-            </span>
-          </div>
-
-          {/* Qibla arrow - independent from the North dial */}
-          <div
-            className="absolute flex h-40 w-40 items-center justify-center transition-transform duration-500"
-            style={{ transform: `rotate(${compassRotation}deg)` }}
-          >
-            <div className="absolute -top-9 flex flex-col items-center">
-              <span className="mb-1 rounded-full border border-[#e8c879] bg-white p-2 font-serif text-[12px] font-bold text-green-900">
-                قبلة
-              </span>
-
-              <div className="h-0 w-0 border-x-[10px] border-b-[22px] border-x-transparent border-b-[#e8c879]" />
-
-              <div className="h-20 w-[3px] bg-gradient-to-b from-[#e8c879] to-[#f5e5b6]" />
-            </div>
-
-            <div className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border-2 border-[#e8c879] bg-[#f8edcf]" />
-          </div>
-
-          {/* Center compass hub */}
-          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full border border-[#e8c879] bg-[#f7edda] text-[#174b3a] shadow-md">
-            <Compass size={25} strokeWidth={1.5} />
-          </div>
+          {/* Independent Kaaba object */}
+          {qibla !== null && (
+            <QiblaMarker angle={relativeQibla} />
+          )}
         </div>
       </div>
 
-      <div className="mt-6 text-center">
-        {bearing !== null ? (
-          <>
-            <p className="text-sm text-[#927d5c]">
-              Qibla bearing from North
-            </p>
+      {/* Qibla status */}
+      <div className="mt-5 rounded-xl bg-emerald-100 p-3 text-center">
+        {aligned ? (
+          <p className="font-bold text-emerald-800">
+            ✓ You are facing Qibla
+          </p>
+        ) : heading !== null && qibla !== null ? (
+          <p className="text-sm font-medium text-emerald-900">
+            Rotate your phone until the Kaaba reaches the top ↑
+          </p>
+        ) : (
+          <p className="text-sm text-gray-600">
+            Enable your compass to find Qibla
+          </p>
+        )}
+      </div>
 
-            <p className="mt-1 font-serif text-3xl font-semibold text-[#174b3a]">
-              {bearing.toFixed(1)}°
+      {/* Details */}
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-emerald-100 bg-white p-4 text-center">
+          <p className="text-[10px] font-bold text-gray-400">
+            QIBLA BEARING
+          </p>
+          <p className="mt-2 text-2xl font-bold text-emerald-800">
+            {qibla !== null ? `${qibla.toFixed(1)}°` : "--"}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-emerald-100 bg-white p-4 text-center">
+          <p className="text-[10px] font-bold text-gray-400">
+            DISTANCE TO MAKKAH
+          </p>
+          <p className="mt-2 text-2xl font-bold text-emerald-800">
+            {distance !== null
+              ? Math.round(distance).toLocaleString()
+              : "--"}
+          </p>
+          <p className="text-xs text-gray-400">Kilometers</p>
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className="mt-3 rounded-xl bg-white p-3 text-xs text-gray-500">
+        {location ? (
+          <>
+            <p className="font-semibold text-emerald-800">
+              Current location
+            </p>
+            <p className="mt-1">
+              {location.latitude.toFixed(5)},{" "}
+              {location.longitude.toFixed(5)}
             </p>
           </>
         ) : (
-          <p className="text-sm text-[#927d5c]">
-            Allow location access to calculate your Qibla direction.
-          </p>
-        )}
-
-        <p className="mt-2 text-xs text-[#927d5c]">
-          {heading === null
-            ? "Enable your compass to find the real North direction."
-            : "Turn your phone until N points toward the top."}
-        </p>
-
-        {heading !== null && (
-          <p className="mt-1 text-xs font-medium text-[#174b3a]">
-            Device heading: {heading.toFixed(1)}°
-          </p>
+          "Detecting location..."
         )}
       </div>
 
-      {location && (
-        <div className="mt-5 flex items-center justify-center gap-2 text-xs text-[#315342]">
-          <MapPin size={14} className="text-[#b18b45]" />
-          <span>
-            {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-          </span>
-        </div>
-      )}
+      {/* Heading */}
+      <div className="mt-3 flex justify-between rounded-xl bg-white p-3 text-sm">
+        <span className="text-gray-500">Device heading</span>
+        <strong className="text-emerald-800">
+          {heading !== null ? `${heading.toFixed(1)}°` : "--"}
+        </strong>
+      </div>
 
       {error && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          <AlertCircle size={17} className="mt-0.5 shrink-0" />
-          <p>{error}</p>
-        </div>
+        <p className="mt-3 rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">
+          {error}
+        </p>
       )}
 
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <button
-          type="button"
-          onClick={enableCompass}
-          className="flex items-center justify-center gap-2 rounded-lg border border-[#c5a45e] bg-[#174b3a] px-5 py-2.5 text-sm font-medium text-[#fff4d7] shadow-sm transition hover:bg-[#21634b]"
-        >
-          <Compass size={16} />
-          {sensorEnabled ? "Compass Enabled" : "Enable Compass"}
-        </button>
+      {/* Button */}
+      <button
+        onClick={enableCompass}
+        disabled={active}
+        className="mt-4 w-full rounded-xl bg-emerald-700 py-4 font-semibold text-white shadow-md transition hover:bg-emerald-800 disabled:opacity-60"
+      >
+        {active ? "Compass Activated" : "Enable Live Compass"}
+      </button>
 
-        <button
-          type="button"
-          onClick={getLocation}
-          disabled={loading}
-          className="flex items-center justify-center gap-2 rounded-lg border border-[#c5a45e] bg-[#174b3a] px-5 py-2.5 text-sm font-medium text-[#fff4d7] shadow-sm transition hover:bg-[#21634b] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <LocateFixed size={16} />
-          {loading ? "Finding location..." : "Refresh Location"}
-        </button>
-      </div>
-    </section>
+      <p className="mt-3 text-center text-xs text-gray-400">
+        Keep your phone flat and away from magnetic objects.
+      </p>
+    </div>
   );
 }
