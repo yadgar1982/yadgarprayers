@@ -221,7 +221,7 @@ useEffect(() => {
   };
 
   const [asrMethod, setAsrMethod] = useState(
-    () => localStorage.getItem("asrMethod") || "0",
+    () => localStorage.getItem("asrMethod") || "1",
   );
   useEffect(() => {
     localStorage.setItem("asrMethod", asrMethod);
@@ -752,41 +752,12 @@ useEffect(() => {
     );
   };
 
-  // Load saved city when app opens
+ // Always use current location when the app opens
   useEffect(() => {
-    const initializeLocation = async () => {
-      const savedLocationId = localStorage.getItem("selectedLocation");
-      const savedLocations = await getLocations();
-
-      const savedLocation = savedLocations?.find(
-        (item) => item._id === savedLocationId,
-      );
-
-      if (savedLocation) {
-        setSelectedLocation(savedLocation._id);
-        setCurrentCity(`${savedLocation.city}, ${savedLocation.country}`);
-
-        const timezone =
-          savedLocation.timezone ||
-          Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-        setSelectedTimezone(timezone);
-
-        await getPrayerTimes(
-          savedLocation.latitude,
-          savedLocation.longitude,
-          calculationMethod,
-          asrMethod,
-          timezone,
-        );
-      } else {
-        localStorage.removeItem("selectedLocation");
-        setSelectedLocation("");
-        detectLocation();
-      }
-    };
-
-    initializeLocation();
+    getLocations();
+    localStorage.removeItem("selectedLocation");
+    setSelectedLocation("");
+    detectLocation();
 
     const timer = setInterval(() => {
       setCurrentTime(new Date());
