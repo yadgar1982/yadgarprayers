@@ -1,0 +1,302 @@
+
+@import "tailwindcss";
+
+/* =================================
+   GLOBAL ADHAN - DYNAMIC SKY BANNER
+================================= */
+
+.sky-banner {
+  position: relative;
+  width: 100%;
+  min-height: 125px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  isolation: isolate;
+  transition: background 1s ease;
+}
+
+/* Sunrise */
+.sky-sunrise {
+  background: linear-gradient(
+    180deg,
+    #657d9c 0%,
+    #e9a77f 55%,
+    #f9d49c 100%
+  );
+}
+
+/* Morning */
+.sky-morning {
+  background: linear-gradient(
+    180deg,
+    #398ac0 0%,
+    #83c6e5 60%,
+    #e5e8d2 100%
+  );
+}
+
+/* Noon */
+.sky-noon {
+  background: linear-gradient(
+    180deg,
+    #2385c3 0%,
+    #70c0e9 65%,
+    #d5e8e8 100%
+  );
+}
+
+/* Afternoon */
+.sky-afternoon {
+  background: linear-gradient(
+    180deg,
+    #548bb1 0%,
+    #e4b17b 65%,
+    #f3d1a0 100%
+  );
+}
+
+/* Sunset */
+.sky-sunset {
+  background: linear-gradient(
+    180deg,
+    #473e68 0%,
+    #bd716f 48%,
+    #f2a66d 100%
+  );
+}
+
+/* Night */
+.sky-night {
+  background: linear-gradient(
+    180deg,
+    #07152f 0%,
+    #142c50 60%,
+    #30486b 100%
+  );
+}
+
+/* Greeting */
+.sky-greeting {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  padding: 20px 15px;
+}
+
+.greeting-time {
+  color: #fff2cf;
+  font-family: Georgia, serif;
+  font-size: clamp(23px, 4vw, 34px);
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.greeting-message {
+  margin-top: 7px;
+  color: #fff8e9;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Sun */
+.sky-sun {
+  position: absolute;
+  top: 18px;
+  right: 12%;
+  width: 53px;
+  height: 53px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fffde0 0%,
+    #ffe69a 48%,
+    #f6b95c 100%
+  );
+  box-shadow: 0 0 30px 12px rgba(255, 218, 135, 0.4);
+}
+
+.sun-glow {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: rgba(255, 220, 150, 0.15);
+  filter: blur(10px);
+}
+
+/* Sunrise and sunset sun position */
+.sky-sunrise .sky-sun,
+.sky-sunset .sky-sun {
+  top: 65px;
+}
+
+/* Moon */
+.sky-moon {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 13%;
+  color: #fff2c9;
+  font-size: 67px;
+  line-height: 1;
+  text-shadow: 0 0 25px rgba(255, 244, 205, 0.55);
+}
+
+.sky-night .sky-moon {
+  display: block;
+}
+
+/* Hide sun at night */
+.sky-night .sky-sun {
+  display: none;
+}
+
+/* Stars */
+.sky-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sky-star {
+  position: absolute;
+  color: #fff2c9;
+  font-size: 12px;
+  opacity: 0;
+  animation: starTwinkle 2.5s infinite ease-in-out;
+}
+
+.sky-night .sky-star,
+.sky-sunset .sky-star {
+  opacity: 0.9;
+}
+
+.star-1 { top: 18%; left: 12%; }
+.star-2 { top: 35%; left: 25%; animation-delay: 1s; }
+.star-3 { top: 15%; left: 42%; animation-delay: 0.5s; }
+.star-4 { top: 25%; left: 65%; animation-delay: 1.4s; }
+.star-5 { top: 55%; left: 80%; animation-delay: 0.8s; }
+.star-6 { top: 68%; left: 15%; animation-delay: 1.7s; }
+.star-7 { top: 12%; left: 88%; animation-delay: 0.3s; }
+.star-8 { top: 72%; left: 55%; animation-delay: 1.2s; }
+.star-9 { top: 45%; left: 45%; animation-delay: 0.6s; }
+.star-10 { top: 80%; left: 35%; animation-delay: 1.5s; }
+.star-11 { top: 30%; left: 92%; animation-delay: 0.9s; }
+.star-12 { top: 60%; left: 70%; animation-delay: 1.8s; }
+.star-13 { top: 10%; left: 30%; animation-delay: 0.4s; }
+.star-14 { top: 85%; left: 90%; animation-delay: 1.1s; }
+.star-15 { top: 48%; left: 8%; animation-delay: 1.6s; }
+.star-16 { top: 20%; left: 75%; animation-delay: 0.7s; }
+.star-17 { top: 75%; left: 75%; animation-delay: 1.3s; }
+.star-18 { top: 38%; left: 58%; animation-delay: 0.2s; }
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+/* Decorative clouds */
+.sky-cloud {
+  position: absolute;
+  bottom: -35px;
+  width: 160px;
+  height: 65px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  filter: blur(13px);
+}
+
+.cloud-one {
+  left: 5%;
+}
+
+.cloud-two {
+  right: 5%;
+  bottom: -45px;
+}
+
+/* Hide clouds at night */
+.sky-night .sky-cloud {
+  opacity: 0.08;
+}
+
+@media (max-width: 480px) {
+  .sky-banner {
+    min-height: 115px;
+  }
+
+  .sky-sun {
+    width: 38px;
+    height: 38px;
+  }
+
+  .sky-moon {
+    font-size: 48px;
+  }
+
+  .greeting-message {
+    max-width: 270px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+}
+.sky-banner {
+  min-height: 125px;
+  border-radius: 12px;
+}
+
+.sky-greeting {
+  padding: 18px 12px;
+}
+
+/* Bright Emerald Ramadan Glow */
+.ramadan-glow {
+  animation: ramadanPulse 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    135deg,
+    #00a653,
+    #20e878,
+    #008f46,
+    #19d96b
+  );
+  background-size: 250% 250%;
+  border: 1px solid #baffd2;
+  box-shadow:
+    0 0 8px rgba(0, 255, 100, 0.95),
+    0 0 18px rgba(0, 255, 100, 0.85),
+    0 0 32px rgba(0, 230, 90, 0.7),
+    0 0 48px rgba(0, 200, 80, 0.5),
+    inset 0 0 12px rgba(255, 255, 255, 0.35);
+}
+
+@keyframes ramadanPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(0, 255, 100, 0.8),
+      0 0 18px rgba(0, 255, 100, 0.65),
+      0 0 30px rgba(0, 230, 90, 0.5),
+      inset 0 0 10px rgba(255, 255, 255, 0.25);
+  }
+
+  50% {
+    box-shadow:
+      0 0 14px rgba(100, 255, 160, 1),
+      0 0 20px rgba(0, 255, 100, 1),
+      0 0 30px rgba(0, 230, 90, 0.9),
+      0 0 40px rgba(0, 200, 80, 0.65),
+      inset 0 0 16px rgba(255, 255, 255, 0.5);
+  }
+}

@@ -1,0 +1,8 @@
+.ramadan-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ramadan-scroll::-webkit-scrollbar {
+  display: none;
+}

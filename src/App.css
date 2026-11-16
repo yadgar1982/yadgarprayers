@@ -1,0 +1,136 @@
+
+/* Global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f8f5;
+    color: #183b32;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+/* Main application */
+.app {
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 42px;
+    color: #075c46;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.header p {
+    color: #71847c;
+    font-size: 16px;
+}
+
+/* Location selection */
+.location-section {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.location-section h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.location-section select {
+    padding: 12px 18px;
+    min-width: 230px;
+    border: 1px solid #c9d8ce;
+    border-radius: 8px;
+    background: white;
+    color: #183b32;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+/* Prayer times section */
+.prayer-section {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.prayer-section h2 {
+    text-align: center;
+    font-size: 25px;
+    color: #075c46;
+    margin-bottom: 25px;
+}
+
+/* Prayer cards */
+.prayer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.prayer-card {
+    background: white;
+    border: 1px solid #e1eae3;
+    border-radius: 12px;
+    padding: 25px 15px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s;
+}
+
+.prayer-card:hover {
+    transform: translateY(-4px);
+}
+
+.prayer-card h3 {
+    color: #71847c;
+    font-size: 17px;
+    margin-bottom: 12px;
+}
+
+.prayer-card p {
+    color: #075c46;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    color: #71847c;
+    padding: 25px;
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+    .app {
+        padding: 25px 15px;
+    }
+
+    .header h1 {
+        font-size: 30px;
+    }
+
+    .prayer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .prayer-card {
+        padding: 20px 10px;
+    }
+}
