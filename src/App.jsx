@@ -123,27 +123,26 @@ const App = () => {
     localStorage.setItem("showRamadanCalendar", String(showRamadanCalendar));
   }, [showRamadanCalendar]);
 
+  // Prevent background scrolling while a modal is open
+  useEffect(() => {
+    const shouldLockBody =
+      showRamadanCalendar ||
+      activeSection === "duas" ||
+      activeSection === "books";
 
-// Prevent background scrolling while a modal is open
-useEffect(() => {
-  const shouldLockBody =
-    showRamadanCalendar ||
-    activeSection === "duas" ||
-    activeSection === "books";
+    if (shouldLockBody) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    }
 
-  if (shouldLockBody) {
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-  } else {
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-  }
-
-  return () => {
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-  };
-}, [showRamadanCalendar, activeSection]);
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [showRamadanCalendar, activeSection]);
 
   const [notification, setNotification] = useState({
     message: "",
@@ -752,7 +751,7 @@ useEffect(() => {
     );
   };
 
- // Always use current location when the app opens
+  // Always use current location when the app opens
   useEffect(() => {
     getLocations();
     localStorage.removeItem("selectedLocation");
@@ -1236,9 +1235,9 @@ useEffect(() => {
   const calendarDates = getCalendarDates(selectedTimezone);
 
   return (
-   <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#020b09] via-[#071b16] to-[#020806] px-2 p-4 text-[#f5eedc]">
-  <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(24,112,77,0.20),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgba(184,145,67,0.08),_transparent_45%)]" />
- 
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#020b09] via-[#071b16] to-[#020806] px-2 p-4 text-[#f5eedc]">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(24,112,77,0.20),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgba(184,145,67,0.08),_transparent_45%)]" />
+
       {/* Success Notification */}
       <div className="fixed right-5 top-5 z-50">
         {notification.message && (
@@ -1503,7 +1502,7 @@ useEffect(() => {
             className="shrink-0 text-[#e8a66b] group-hover:scale-110"
           />
           <span className="whitespace-nowrap font-serif text-xs font-medium">
-           Books
+            Books
           </span>
         </button>
 
@@ -1572,7 +1571,10 @@ useEffect(() => {
               ×
             </button>
 
-            <QiblaCompass />
+            <QiblaCompass
+              coordinates={activeCoordinates}
+              cityName={currentCity}
+            />
           </div>
         </div>
       )}
@@ -1602,13 +1604,20 @@ useEffect(() => {
 
             <div className="mb-3 flex items-center justify-center gap-3 text-xs font-medium tracking-[0.3em] text-[#a47c37]">
               <span className="h-px w-10 bg-[#c5a45e]/70" />
-              <span>۞ YOUR DAILY WORSHIP ۞</span>
+              <span>  </span>
               <span className="h-px w-10 bg-[#c5a45e]/70" />
             </div>
 
-            <h2 className="font-serif text-2xl font-bold tracking-wide text-[#174b3a] sm:text-3xl">
-              Today's Prayer Times
+            <h2 className="font-serif text-2xl font-bold tracking-wide text-[#174b3a] text-lg sm:text-3xl">
+             ✧ Today's Prayer Times ✧
+              
             </h2>
+{currentCity && (
+  <p className="mt-2 font-serif text-sm font-semibold text-[#98733c]">
+    <MapPin size={14} className="mr-1 inline-block" />
+    {currentCity}
+  </p>
+)}
 
             <button
               type="button"
@@ -1623,9 +1632,7 @@ useEffect(() => {
                 Find Qibla
               </span>
             </button>
-            <p className="mt-2 font-serif text-sm italic tracking-wide text-[#927d5c]">
-              Your daily prayer schedule
-            </p>
+         
 
             <div className="mx-auto mt-4 flex max-w-xs items-center justify-center gap-3 text-[#b18b45]">
               <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c5a45e]" />
@@ -1660,7 +1667,7 @@ useEffect(() => {
           {/* Prayer Cards */}
 
           {prayerTimes && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+            <div className="grid grid-cols-2 gap-2 sm:gap-5 lg:grid-cols-3">
               {prayers.map((prayer) => {
                 const scenes = {
                   Fajr: {
@@ -1739,7 +1746,7 @@ useEffect(() => {
                     className="group relative overflow-hidden rounded-t-[125px] rounded-b-2xl border-2 border-[#c5a45e] bg-[#174b3a] p-2 shadow-[0_7px_22px_rgba(23,75,58,0.20)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(155,125,65,0.25)]"
                   >
                     <div
-                      className={`relative min-h-[275px] overflow-hidden rounded-t-[115px] rounded-b-xl bg-gradient-to-b ${scene.sky}`}
+                      className={`relative min-h-[230px] sm:min-h-[275px] overflow-hidden rounded-t-[90px] sm:rounded-t-[115px] rounded-b-xl bg-gradient-to-b ${scene.sky}`}
                     >
                       {/* Atmospheric glow */}
                       <div
@@ -1826,13 +1833,14 @@ useEffect(() => {
                           <div className="h-px w-8 bg-[#d8bd78]" />
                         </div>
 
-                        <p className="font-serif text-3xl font-bold tabular-nums text-[#fff1c9]">
-                          {formatTime(prayer.time)}
-                        </p>
+                       <p
+  className="text-1xl sm:text-3xl font-bold tabular-nums tracking-wider text-[#fff1c9]"
+  style={{ fontFamily: "'Orbitron', sans-serif" }}
+>
+  {formatTime(prayer.time)}
+</p>
 
-                        <p className="mt-2 text-[10px] font-medium tracking-[0.25em] text-[#e4cb91]">
-                          {scene.caption.toUpperCase()}
-                        </p>
+                      
                       </div>
 
                       {/* Delicate inner gold arch */}
@@ -1889,9 +1897,12 @@ useEffect(() => {
                   TIME REMAINING
                 </p>
 
-                <p className="font-serif text-4xl font-semibold tabular-nums tracking-[0.12em] text-white sm:text-5xl">
-                  {getCountdown()}
-                </p>
+                <p
+  className="text-4xl font-semibold tabular-nums tracking-[0.12em] text-white sm:text-5xl"
+  style={{ fontFamily: "'Orbitron', sans-serif" }}
+>
+  {getCountdown()}
+</p>
               </div>
 
               <p className="mt-5 font-serif text-sm italic text-[#e8d9b5]">

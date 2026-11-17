@@ -201,7 +201,7 @@ function QiblaMarker({ angle }) {
   );
 }
 
-export default function QiblaCompass() {
+export default function QiblaCompass({ coordinates, cityName }) {
   const [location, setLocation] = useState(null);
   const [heading, setHeading] = useState(null);
   const [qibla, setQibla] = useState(null);
@@ -212,46 +212,60 @@ export default function QiblaCompass() {
   const listenerRef = useRef(null);
   const eventRef = useRef(null);
 
-  // Live location
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("Location is not supported by your browser.");
-      return;
-    }
+  // Use selected city coordinates first; otherwise detect device GPS
+useEffect(() => {
+  // Selected city coordinates take priority
+  if (
+    coordinates &&
+    Number.isFinite(Number(coordinates.latitude)) &&
+    Number.isFinite(Number(coordinates.longitude))
+  ) {
+    const latitude = Number(coordinates.latitude);
+    const longitude = Number(coordinates.longitude);
 
-    const watch = navigator.geolocation.watchPosition(
-      ({ coords }) => {
-        const { latitude, longitude } = coords;
+    setLocation({ latitude, longitude });
+    setQibla(getQibla(latitude, longitude));
+    setDistance(getDistance(latitude, longitude));
+    setError("");
 
-        setLocation({ latitude, longitude });
-        setQibla(getQibla(latitude, longitude));
-        setDistance(getDistance(latitude, longitude));
-      },
-     (error) => {
-  switch (error.code) {
-    case error.PERMISSION_DENIED:
-      setError("Location permission denied. Please allow location access in iPhone Settings.");
-      break;
-    case error.POSITION_UNAVAILABLE:
-      setError("Your location is unavailable. Check your GPS settings.");
-      break;
-    case error.TIMEOUT:
-      setError("Location request timed out. Please try again.");
-      break;
-    default:
-      setError("Unable to detect your location.");
+    return;
   }
-},
-      {
-        enableHighAccuracy: true,
-        maximumAge: 3000,
-        timeout: 20000,
+
+  // Fall back to the phone's GPS location
+  if (!navigator.geolocation) {
+    setError("Location is not supported by your browser.");
+    return;
+  }
+
+  const watch = navigator.geolocation.watchPosition(
+    ({ coords }) => {
+      const { latitude, longitude } = coords;
+
+      setLocation({ latitude, longitude });
+      setQibla(getQibla(latitude, longitude));
+      setDistance(getDistance(latitude, longitude));
+      setError("");
+    },
+    (err) => {
+      if (err.code === 1) {
+        setError("Please allow location access.");
+      } else if (err.code === 2) {
+        setError("Your location is unavailable.");
+      } else if (err.code === 3) {
+        setError("Location request timed out.");
+      } else {
+        setError("Unable to detect your location.");
       }
-    );
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 3000,
+      timeout: 20000,
+    }
+  );
 
-    return () => navigator.geolocation.clearWatch(watch);
-  }, []);
-
+  return () => navigator.geolocation.clearWatch(watch);
+}, [coordinates?.latitude, coordinates?.longitude]);
   // Enable orientation sensor
   const enableCompass = async () => {
     setError("");
@@ -416,23 +430,26 @@ export default function QiblaCompass() {
         </div>
       </div>
 
-      {/* Location */}
-      <div className="mt-3 rounded-xl bg-white p-3 text-xs text-gray-500">
-        {location ? (
-          <>
-            <p className="font-semibold text-emerald-800">
-              Current location
-            </p>
-            <p className="mt-1">
-              {location.latitude.toFixed(5)},{" "}
-              {location.longitude.toFixed(5)}
-            </p>
-          </>
-        ) : (
-          "Detecting location..."
-        )}
-      </div>
+    {/* Location */}
+<div className="mt-3 rounded-xl bg-white p-3 text-xs text-gray-500">
+  {location ? (
+    <>
+      <p className="font-semibold text-emerald-800">
+        {cityName || "Current Location"}
+      </p>
 
+      <p className="mt-1">
+        Latitude: {location.latitude.toFixed(5)}
+      </p>
+
+      <p>
+        Longitude: {location.longitude.toFixed(5)}
+      </p>
+    </>
+  ) : (
+    "Detecting location..."
+  )}
+</div>
       {/* Heading */}
       <div className="mt-3 flex justify-between rounded-xl bg-white p-3 text-sm">
         <span className="text-gray-500">Device heading</span>
