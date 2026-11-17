@@ -184,7 +184,7 @@ function QiblaMarker({ angle }) {
         <div
           className="absolute left-0 top-0"
           style={{
-            transform: "translate(-50%, -50%) translateY(-128px)",
+            transform: "translate(-50%, -50%) translateY(-100px)",
           }}
         >
           <div
@@ -227,7 +227,21 @@ export default function QiblaCompass() {
         setQibla(getQibla(latitude, longitude));
         setDistance(getDistance(latitude, longitude));
       },
-      () => setError("Please allow location access."),
+     (error) => {
+  switch (error.code) {
+    case error.PERMISSION_DENIED:
+      setError("Location permission denied. Please allow location access in iPhone Settings.");
+      break;
+    case error.POSITION_UNAVAILABLE:
+      setError("Your location is unavailable. Check your GPS settings.");
+      break;
+    case error.TIMEOUT:
+      setError("Location request timed out. Please try again.");
+      break;
+    default:
+      setError("Unable to detect your location.");
+  }
+},
       {
         enableHighAccuracy: true,
         maximumAge: 3000,
@@ -316,10 +330,10 @@ export default function QiblaCompass() {
     ) <= 5;
 
   return (
-    <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-b from-white to-emerald-50 p-5 shadow-xl">
+    <div className="mx-auto flex min-h-[90vh] w-full max-w-md flex-col overflow-x-hidden bg-gradient-to-b from-white to-emerald-50 px-4 py-3 sm:min-h-0 sm:rounded-3xl sm:border sm:border-emerald-100 sm:p-5 sm:shadow-xl">
 
       {/* Header */}
-      <div className="mb-5 text-center">
+      <div className="mb-3 shrink-0 text-center">
         <p className="text-xs font-bold tracking-[3px] text-emerald-700">
           ISLAMIC COMPASS
         </p>
@@ -328,13 +342,11 @@ export default function QiblaCompass() {
           Qibla Direction
         </h2>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Find the direction of the Holy Kaaba
-        </p>
+      
       </div>
 
       {/* Main compass */}
-      <div className="relative mx-auto aspect-square w-full max-w-[330px]">
+     <div className="relative mx-auto aspect-square w-full max-w-[270px] shrink-0 sm:max-w-[310px]">
 
         {/* Outer border */}
         <div className="absolute inset-0 rounded-full border-[9px] border-emerald-700 bg-white shadow-lg">
@@ -381,7 +393,7 @@ export default function QiblaCompass() {
       </div>
 
       {/* Details */}
-      <div className="mt-4 grid grid-cols-2 gap-3">
+     <div className="mt-3 grid shrink-0 grid-cols-2 gap-2">
         <div className="rounded-xl border border-emerald-100 bg-white p-4 text-center">
           <p className="text-[10px] font-bold text-gray-400">
             QIBLA BEARING
@@ -436,13 +448,13 @@ export default function QiblaCompass() {
       )}
 
       {/* Button */}
-      <button
-        onClick={enableCompass}
-        disabled={active}
-        className="mt-4 w-full rounded-xl bg-emerald-700 py-4 font-semibold text-white shadow-md transition hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {active ? "Compass Activated" : "Enable Live Compass"}
-      </button>
+     <button
+  onClick={enableCompass}
+  disabled={active}
+  className="mt-3 w-full shrink-0 rounded-xl bg-emerald-700 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-800 disabled:opacity-60"
+>
+  {active ? "Compass Activated" : "Enable Live Compass"}
+</button>
 
       <p className="mt-3 text-center text-xs text-gray-400">
         Keep your phone flat and away from magnetic objects.
