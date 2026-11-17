@@ -1319,11 +1319,18 @@ const App = () => {
 
       {/* GLOBAL ADHAN BRAND & CALENDAR CARD */}
       <div className="mx-auto mt-4 w-full max-w-5xl overflow-hidden rounded-2xl border border-[#c5a45e]/70 bg-[#fffdf7] shadow-[0_12px_35px_rgba(23,75,58,0.13)]">
-        {/* BRAND HEADER */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#082f26] via-[#174b3a] to-[#0b382b] px-4 pb-4 pt-5 text-center sm:pb-5 sm:pt-6">
-          {/* Subtle decorative details */}
+        {/* UNIFIED EMERALD BRAND & GREETING */}
+        <div
+          className={`sky-banner sky-${skyPhase} relative isolate overflow-hidden rounded-t-xl max-w-6xl px-5 `}
+          style={{
+            background:
+              "linear-gradient(135deg, #082f26 0%, #14513d 50%, #082f26 100%)",
+            minHeight: "270px",
+          }}
+        >
+          {/* Background pattern */}
           <div
-            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            className="pointer-events-none absolute inset-0 opacity-[0.10]"
             style={{
               backgroundImage:
                 "radial-gradient(circle at center, #e8c879 1px, transparent 1px)",
@@ -1331,45 +1338,42 @@ const App = () => {
             }}
           />
 
-          <div className="relative z-10">
-            <p className="mb-1 text-[14px] font-medium tracking-[0.4em] text-[#d8bd78]">
-              ۞ YADGAR ۞
+          {/* Stars */}
+          <div className="sky-stars">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <span key={i} className={`sky-star star-${i + 1}`}>
+                ✦
+              </span>
+            ))}
+          </div>
+
+          {/* Sun and moon */}
+          <div className="sky-sun">
+            <div className="sun-glow" />
+          </div>
+
+          <div className="sky-moon">☾</div>
+
+          {/* Clouds */}
+          <div className="sky-cloud cloud-one" />
+          <div className="sky-cloud cloud-two" />
+
+          {/* Greeting content */}
+          <div className="relative z-10 flex flex-col items-center">
+            <p className="mb-3 text-xs font-semibold tracking-[0.4em] text-[#e8c879] sm:text-lg">
+              ۞ Y A D G A R ۞
             </p>
 
-            <h1 className="font-serif text-xl font-bold uppercase tracking-[0.12em] text-[#f4dfa9] sm:text-3xl sm:tracking-[0.18em]">
-              ISLAMIC CALENDER
+            <h1 className="mb-6 font-serif text-2xl font-bold uppercase tracking-[0.10em] text-[#f4dfa9] sm:text-4xl">
+              ISLAMIC CALENDAR
             </h1>
 
-            {/* DYNAMIC SKY GREETING */}
-            <div
-              className={`sky-banner sky-${skyPhase} mt-4 rounded-xl border border-[#e8c879]/40 shadow-inner`}
-            >
-              <div className="sky-stars">
-                {Array.from({ length: 18 }).map((_, i) => (
-                  <span key={i} className={`sky-star star-${i + 1}`}>
-                    ✦
-                  </span>
-                ))}
-              </div>
+            <h2 className="font-serif text-3xl font-bold text-[#fff4d7] drop-shadow-lg sm:text-5xl">
+              {greeting}
+            </h2>
 
-              <div className="sky-sun">
-                <div className="sun-glow" />
-              </div>
-
-              <div className="sky-moon">☾</div>
-
-              <div className="sky-cloud cloud-one" />
-              <div className="sky-cloud cloud-two" />
-
-              <div className="sky-greeting">
-                <p className="greeting-time">{greeting}</p>
-
-                <p className="greeting-message">{greetingMessage[skyPhase]}</p>
-              </div>
-            </div>
-
-            <p className="mt-3 text-[9px] font-medium tracking-[0.25em] text-[#e8c879] sm:text-[10px]">
-              A MOMENT OF REMEMBRANCE
+            <p className="mt-3 font-serif text-xs italic text-[#f4e7c6] sm:text-sm">
+              {greetingMessage[skyPhase]}
             </p>
           </div>
         </div>
@@ -1579,9 +1583,9 @@ const App = () => {
         </div>
       )}
 
-      <main className="mx-auto max-w-6xl px-5 py-10">
+      <main className="mx-auto w-full max-w-5xl px-0 py-10">
         {/* Prayer Times */}
-        <section className="relative mx-auto mb-8 max-w-6xl rounded-[28px] border-[3px] border-double border-[#c5a45e] bg-[#fdfbf5]/60 px-3 py-5 shadow-[0_8px_28px_rgba(139,107,50,0.10)] sm:px-6 sm:py-7">
+        <section className="relative mx-auto mb-8 w-full max-w-5xl rounded-[28px] border-[3px] border-double border-[#c5a45e] bg-[#fdfbf5]/60 px-3 py-5 shadow-[0_8px_28px_rgba(139,107,50,0.10)] sm:px-6 sm:py-7">
           {/* Delicate certificate-style ornamental frame */}
           <div className="pointer-events-none absolute inset-2 rounded-[22px] border border-[#c5a45e]/50" />
 
@@ -1604,20 +1608,19 @@ const App = () => {
 
             <div className="mb-3 flex items-center justify-center gap-3 text-xs font-medium tracking-[0.3em] text-[#a47c37]">
               <span className="h-px w-10 bg-[#c5a45e]/70" />
-              <span>  </span>
+              <span> </span>
               <span className="h-px w-10 bg-[#c5a45e]/70" />
             </div>
 
             <h2 className="font-serif text-2xl font-bold tracking-wide text-[#174b3a] text-lg sm:text-3xl">
-             ✧ Today's Prayer Times ✧
-              
+              ✧ Today's Prayer Times ✧
             </h2>
-{currentCity && (
-  <p className="mt-2 font-serif text-sm font-semibold text-[#98733c]">
-    <MapPin size={14} className="mr-1 inline-block" />
-    {currentCity}
-  </p>
-)}
+            {currentCity && (
+              <p className="mt-2 font-serif text-sm font-semibold text-[#98733c]">
+                <MapPin size={14} className="mr-1 inline-block" />
+                {currentCity}
+              </p>
+            )}
 
             <button
               type="button"
@@ -1632,7 +1635,6 @@ const App = () => {
                 Find Qibla
               </span>
             </button>
-         
 
             <div className="mx-auto mt-4 flex max-w-xs items-center justify-center gap-3 text-[#b18b45]">
               <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c5a45e]" />
@@ -1833,14 +1835,12 @@ const App = () => {
                           <div className="h-px w-8 bg-[#d8bd78]" />
                         </div>
 
-                       <p
-  className="text-1xl sm:text-3xl font-bold tabular-nums tracking-wider text-[#fff1c9]"
-  style={{ fontFamily: "'Orbitron', sans-serif" }}
->
-  {formatTime(prayer.time)}
-</p>
-
-                      
+                        <p
+                          className="text-1xl sm:text-3xl font-bold tabular-nums tracking-wider text-[#fff1c9]"
+                          style={{ fontFamily: "'Orbitron', sans-serif" }}
+                        >
+                          {formatTime(prayer.time)}
+                        </p>
                       </div>
 
                       {/* Delicate inner gold arch */}
@@ -1898,11 +1898,11 @@ const App = () => {
                 </p>
 
                 <p
-  className="text-4xl font-semibold tabular-nums tracking-[0.12em] text-white sm:text-5xl"
-  style={{ fontFamily: "'Orbitron', sans-serif" }}
->
-  {getCountdown()}
-</p>
+                  className="text-4xl font-semibold tabular-nums tracking-[0.12em] text-white sm:text-5xl"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {getCountdown()}
+                </p>
               </div>
 
               <p className="mt-5 font-serif text-sm italic text-[#e8d9b5]">
