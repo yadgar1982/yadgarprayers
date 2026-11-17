@@ -330,7 +330,7 @@ export default function QiblaCompass() {
     ) <= 5;
 
   return (
-    <div className="mx-auto flex min-h-[90vh] w-full max-w-md flex-col overflow-x-hidden bg-gradient-to-b from-white to-emerald-50 px-4 py-3 sm:min-h-0 sm:rounded-3xl sm:border sm:border-emerald-100 sm:p-5 sm:shadow-xl">
+    <div className="mx-auto flex min-h-[80vh] w-full max-w-md flex-col overflow-x-hidden bg-gradient-to-b from-white to-emerald-50 px-4 py-3 sm:min-h-0 sm:rounded-3xl sm:border sm:border-emerald-100 sm:p-5 sm:shadow-xl">
 
       {/* Header */}
       <div className="mb-3 shrink-0 text-center">
