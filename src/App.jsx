@@ -385,7 +385,7 @@ const App = () => {
   // One live compass heading shared by the small arrow and full Qibla compass.
   const normalizeDegrees = (value) => ((value % 360) + 360) % 360;
 
-   // ============================================================
+  // ============================================================
   // LIVE COMPASS SENSOR
   // Automatically starts listening when the app has coordinates.
   // The same heading is shared by the small Qibla arrow and
@@ -1854,13 +1854,13 @@ const App = () => {
           onClick={() => setActiveSection("")}
         >
           <div
-           className="relative my-auto max-h-[calc(100dvh-120px)] w-full max-w-md overflow-y-auto rounded-2xl bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-5 shadow-2xl sm:max-h-[90vh]"
+            className="relative my-auto max-h-[calc(100dvh-120px)] w-full max-w-md overflow-y-auto rounded-2xl bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-5 shadow-2xl sm:max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setActiveSection("")}
-              className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[#c5a45e]/50 text-lg text-white transition bg-red-500 hover:bg-red-300"
+              className="absolute right-7 top-7 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[#c5a45e]/50 text-lg text-white transition bg-red-500 hover:bg-red-300"
               aria-label="Close Qibla"
             >
               ×
@@ -1889,20 +1889,84 @@ const App = () => {
             <button
               type="button"
               onClick={openQiblaCompass}
-              aria-label="Open live Qibla compass"
-              title="Qibla direction — click to open the full compass"
-              className="absolute right-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a66e28] md:flex"
+              aria-label="Open full Qibla compass"
+              title="Live Qibla direction — tap to open the full compass"
+              className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a66e28]"
             >
-              <Navigation
-                size={29}
-                strokeWidth={1.8}
-                fill="#a66e28"
-                className="text-[#8c5d24] drop-shadow-[0_1px_1px_rgba(80,48,15,0.22)] transition-transform duration-100"
-                style={{
-                  transform: `rotate(${getCompassNeedleRotation()}deg)`,
-                  transition: "transform 0.15s ease-out",
-                }}
-              />
+              <div className="relative flex items-center justify-center">
+                {/* Rotating arrow and Kaaba together */}
+
+                <div className="relative flex items-center justify-center">
+                  {/* Rotate the Kaaba and arrow together */}
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{
+                      transform: `rotate(${getCompassNeedleRotation()}deg)`,
+                      transformOrigin: "center center",
+                      transition: "transform 0.15s ease-out",
+                    }}
+                  >
+                    {/* Arrow */}
+                    {/* <Navigation
+                            className="YOUR_EXISTING_NAVIGATION_CLASSES"
+                          /> */}
+
+                    {/* Single rotating Qibla arrow + Kaaba */}
+                    <div
+                      className="flex items-center justify-center"
+                      style={{
+                        transform: `rotate(${getCompassNeedleRotation() + 30}deg)`,
+                        transformOrigin: "center center",
+                        transition: "transform 0.15s ease-out",
+                      }}
+                    >
+                      <svg
+                        viewBox="0 0 100 145"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-10 w-8"
+                        style={{
+                          transform: `rotate(${getCompassNeedleRotation()}deg)`,
+                          transformOrigin: "center center",
+                          transition: "transform 0.15s ease-out",
+                        }}
+                      >
+                        <path
+                          d="M50 4 L88 65 L50 48 L12 65 Z"
+                          fill="#171717"
+                          stroke="#B58A36"
+                          strokeWidth="2"
+                          strokeLinejoin="round"
+                        />
+
+                        <path
+                          d="M8 76 L50 53 L92 76 L92 119 L50 143 L8 119 Z"
+                          fill="#171717"
+                          stroke="#B58A36"
+                          strokeWidth="2"
+                          strokeLinejoin="round"
+                        />
+
+                        <path
+                          d="M9 88 L50 111 L91 88"
+                          fill="none"
+                          stroke="#E5B83B"
+                          strokeWidth="6"
+                        />
+
+                        <rect
+                          x="64"
+                          y="105"
+                          width="10"
+                          height="13"
+                          fill="#D6AD50"
+                          stroke="#A87922"
+                          strokeWidth="1"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </button>
 
             {/* Delicate ornamental corners */}
@@ -2303,9 +2367,9 @@ const App = () => {
                         )}
 
                         {/* Sun or crescent */}
-                        <div className="absolute left-1/2 top-[24%] -translate-x-1/2">
+                        <div className="absolute left-1/2 top-[8%] -translate-x-1/2">
                           <div
-                            className={`flex h-16 w-16 items-center justify-center rounded-full ${scene.celestialStyle}`}
+                            className={`flex h-16 w-16 items-center justify-center bg-transparent rounded-full `}
                           >
                             <span className="text-5xl">{scene.celestial}</span>
                           </div>
@@ -2325,20 +2389,176 @@ const App = () => {
                         />
 
                         {/* Mosque silhouette */}
-                        <div className="absolute bottom-[19%] left-0 right-0 flex items-end justify-center text-[#102f2b]">
+                        <div className="absolute bottom-[15%] left-0 right-0 z-[2] flex items-end justify-center text-[#102f2b]">
                           <svg
-                            viewBox="0 0 300 95"
-                            className="w-full max-w-[280px] drop-shadow-md"
+                            viewBox="0 0 300 150"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-full max-w-[280px] translate-y-3 drop-shadow-lg opacity-70"
                             fill="currentColor"
                           >
-                            <path d="M20 95V48H55V95H20ZM62 95V35Q80 5 98 35V95H62ZM103 95V48H197V95H103ZM202 95V35Q220 5 238 35V95H202ZM245 95V48H280V95H245Z" />
-                            <path d="M125 95V49Q150 8 175 49V95H125Z" />
-                            <path d="M145 30V13H155V30Z M150 13L150 3L157 12Z" />
-                            <path d="M35 48V15H40V48ZM32 15L37 2L43 15ZM260 48V15H265V48ZM257 15L262 2L268 15Z" />
+                            <defs>
+                              <linearGradient
+                                id="mosqueBody"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop offset="0%" stopColor="#24594b" />
+                                <stop offset="100%" stopColor="#102f2b" />
+                              </linearGradient>
+
+                              <linearGradient
+                                id="mosqueDome"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop offset="0%" stopColor="#d8bd78" />
+                                <stop offset="100%" stopColor="#8e713e" />
+                              </linearGradient>
+
+                              <linearGradient
+                                id="mosqueGold"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop offset="0%" stopColor="#f2d995" />
+                                <stop offset="100%" stopColor="#b18b45" />
+                              </linearGradient>
+                            </defs>
+
+                            {/* Main mosque building */}
                             <path
-                              d="M137 95V66Q150 48 163 66V95Z"
-                              fill="#d4b875"
-                              opacity=".75"
+                              d="M35 150V85H265V150Z"
+                              fill="url(#mosqueBody)"
+                            />
+
+                            {/* Main dome */}
+                            <path
+                              d="M105 85C105 45 125 20 150 20C175 20 195 45 195 85Z"
+                              fill="url(#mosqueDome)"
+                              stroke="#b18b45"
+                              strokeWidth="2"
+                            />
+
+                            {/* Main dome crescent */}
+                            <path
+                              d="M150 20V12"
+                              stroke="#e5ca83"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M150 1C140 1 137 12 144 18C141 10 148 5 156 9C155 4 153 1 150 1Z"
+                              fill="#f2d995"
+                            />
+
+                            {/* Side domes */}
+                            <path
+                              d="M45 85C45 62 57 48 70 48C83 48 95 62 95 85Z"
+                              fill="url(#mosqueDome)"
+                            />
+                            <path
+                              d="M205 85C205 62 217 48 230 48C243 48 255 62 255 85Z"
+                              fill="url(#mosqueDome)"
+                            />
+
+                            {/* Left minaret */}
+                            <path
+                              d="M15 150V40H30V150Z"
+                              fill="url(#mosqueBody)"
+                            />
+                            <path
+                              d="M10 40H35L22.5 18Z"
+                              fill="url(#mosqueDome)"
+                            />
+                            <path
+                              d="M22.5 18V10"
+                              stroke="#e5ca83"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M22.5 2C16 2 13 10 17 15C15 8 21 4 27 7C26 4 24 2 22.5 2Z"
+                              fill="#f2d995"
+                            />
+                            <path
+                              d="M8 65H37M8 72H37"
+                              stroke="#d8bd78"
+                              strokeWidth="2"
+                            />
+
+                            {/* Right minaret */}
+                            <path
+                              d="M270 150V40H285V150Z"
+                              fill="url(#mosqueBody)"
+                            />
+                            <path
+                              d="M265 40H290L277.5 18Z"
+                              fill="url(#mosqueDome)"
+                            />
+                            <path
+                              d="M277.5 18V10"
+                              stroke="#e5ca83"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M277.5 2C271 2 268 10 272 15C270 8 276 4 282 7C281 4 279 2 277.5 2Z"
+                              fill="#f2d995"
+                            />
+                            <path
+                              d="M263 65H292M263 72H292"
+                              stroke="#d8bd78"
+                              strokeWidth="2"
+                            />
+
+                            {/* Main entrance arch */}
+                            <path
+                              d="M125 150V112C125 94 137 82 150 82C163 82 175 94 175 112V150Z"
+                              fill="#09251f"
+                              stroke="#d8bd78"
+                              strokeWidth="2"
+                            />
+
+                            {/* Windows */}
+                            <path
+                              d="M55 110V98C55 89 62 83 69 83C76 83 83 89 83 98V110Z"
+                              fill="#d8bd78"
+                              opacity=".8"
+                            />
+                            <path
+                              d="M217 110V98C217 89 224 83 231 83C238 83 245 89 245 98V110Z"
+                              fill="#d8bd78"
+                              opacity=".8"
+                            />
+                            <path
+                              d="M90 110V100C90 92 96 87 102 87C108 87 114 92 114 100V110Z"
+                              fill="#d8bd78"
+                              opacity=".7"
+                            />
+                            <path
+                              d="M186 110V100C186 92 192 87 198 87C204 87 210 92 210 100V110Z"
+                              fill="#d8bd78"
+                              opacity=".7"
+                            />
+
+                            {/* Gold architectural details */}
+                            <path
+                              d="M35 85H265"
+                              stroke="url(#mosqueGold)"
+                              strokeWidth="3"
+                            />
+                            <path
+                              d="M35 115H125M175 115H265"
+                              stroke="#d8bd78"
+                              strokeWidth="1.5"
+                            />
+                            <path
+                              d="M105 85H195"
+                              stroke="#f2d995"
+                              strokeWidth="2"
                             />
                           </svg>
                         </div>

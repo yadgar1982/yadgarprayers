@@ -565,11 +565,11 @@ const todayDateString = [
                 </div>
               </div>
               <div className="flex items-center justify-center">
-                {hijriMonth === 9 ? "Fajr" : "Sehri"}
+                {hijriMonth === 9 ? "سحور" : "فجر"}
               </div>
 
               <div className="flex items-center justify-center">
-                {hijriMonth === 9 ? "Maghrib" : "Iftar"}
+                {hijriMonth === 9 ? "افطار" : "مغرب"}
               </div>
             </div>
 
