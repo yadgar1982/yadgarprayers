@@ -1884,130 +1884,7 @@ const App = () => {
 
           {/* Elegant Section Heading */}
 
-          <div className="relative mb-6 overflow-hidden rounded-2xl border border-[#c5a45e]/50 bg-gradient-to-b from-[#fffdf8] to-[#f6efdf] px-5 py-7 text-center shadow-[0_5px_18px_rgba(139,107,50,0.10)]">
-            {/* Minimal live Qibla arrow — tap to open the full compass. */}
-            <button
-              type="button"
-              onClick={openQiblaCompass}
-              aria-label="Open full Qibla compass"
-              title="Live Qibla direction — tap to open the full compass"
-              className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a66e28]"
-            >
-              <div className="relative flex items-center justify-center">
-                {/* Rotating arrow and Kaaba together */}
-
-                <div className="relative flex items-center justify-center">
-                  {/* Rotate the Kaaba and arrow together */}
-                  <div
-                    className="relative flex items-center justify-center"
-                    style={{
-                      transform: `rotate(${getCompassNeedleRotation()}deg)`,
-                      transformOrigin: "center center",
-                      transition: "transform 0.15s ease-out",
-                    }}
-                  >
-                    {/* Arrow */}
-                    {/* <Navigation
-                            className="YOUR_EXISTING_NAVIGATION_CLASSES"
-                          /> */}
-
-                    {/* Single rotating Qibla arrow + Kaaba */}
-                    <div
-                      className="flex items-center justify-center"
-                      style={{
-                        transform: `rotate(${getCompassNeedleRotation() + 30}deg)`,
-                        transformOrigin: "center center",
-                        transition: "transform 0.15s ease-out",
-                      }}
-                    >
-                      <svg
-                        viewBox="0 0 100 145"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-10 w-8"
-                        style={{
-                          transform: `rotate(${getCompassNeedleRotation()}deg)`,
-                          transformOrigin: "center center",
-                          transition: "transform 0.15s ease-out",
-                        }}
-                      >
-                        <path
-                          d="M50 4 L88 65 L50 48 L12 65 Z"
-                          fill="#171717"
-                          stroke="#B58A36"
-                          strokeWidth="2"
-                          strokeLinejoin="round"
-                        />
-
-                        <path
-                          d="M8 76 L50 53 L92 76 L92 119 L50 143 L8 119 Z"
-                          fill="#171717"
-                          stroke="#B58A36"
-                          strokeWidth="2"
-                          strokeLinejoin="round"
-                        />
-
-                        <path
-                          d="M9 88 L50 111 L91 88"
-                          fill="none"
-                          stroke="#E5B83B"
-                          strokeWidth="6"
-                        />
-
-                        <rect
-                          x="64"
-                          y="105"
-                          width="10"
-                          height="13"
-                          fill="#D6AD50"
-                          stroke="#A87922"
-                          strokeWidth="1"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </button>
-
-            {/* Delicate ornamental corners */}
-
-            <div className="mb-3 flex items-center justify-center gap-3 text-xs font-medium tracking-[0.3em] text-[#a47c37]">
-              <span className="h-px w-10 bg-[#c5a45e]/70" />
-              <span> </span>
-              <span className="h-px w-10 bg-[#c5a45e]/70" />
-            </div>
-
-            <h2 className="font-serif text-2xl font-bold tracking-wide text-[#174b3a] text-lg sm:text-3xl">
-              ✧ Today's Prayer Times ✧
-            </h2>
-            {currentCity && (
-              <p className="mt-2 font-serif text-sm font-semibold text-[#98733c]">
-                <MapPin size={14} className="mr-1 inline-block" />
-                {currentCity}
-              </p>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowRamadanCalendar(false);
-                setActiveSection("qibla");
-              }}
-              className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#c5a45e]/60 bg-[#174b3a] px-4 py-1.5 text-[#f4dfa9] shadow-sm transition-all duration-200 hover:border-[#e5c77f] hover:bg-[#21634b]"
-            >
-              <Compass size={14} strokeWidth={1.6} />
-              <span className="font-serif text-xs tracking-wide">
-                Find Qibla
-              </span>
-            </button>
-
-            <div className="mx-auto mt-4 flex max-w-xs items-center justify-center gap-3 text-[#b18b45]">
-              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c5a45e]" />
-              <span className="text-lg">✧ ۞ ✧</span>
-              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#c5a45e]" />
-            </div>
-          </div>
-
+         
           {/* Loading State */}
           {prayerLoading && (
             <div className="rounded-2xl border border-[#e8d9b5] bg-[#fffdf7] px-5 py-10 text-center shadow-sm">
@@ -2647,8 +2524,8 @@ const App = () => {
               )}
 
               {/* MONTHLY QAMARI CALENDAR - RESPONSIVE */}
-              <section className="mt-7 overflow-hidden rounded-2xl border border-[#c5a45e]/70 bg-[#fffaf0] text-[#493a29] shadow-[0_8px_25px_rgba(23,75,58,0.12)]">
-                <div className="bg-gradient-to-r from-[#174b3a] to-[#23634b] px-4 py-4 text-center text-[#fff4d7]">
+              <section className=" overflow-hidden rounded-2xl border border-[#c5a45e]/70 bg-[#fffaf0] text-[#493a29] shadow-[0_8px_25px_rgba(23,75,58,0.12)]">
+                <div className="bg-gradient-to-r from-[#174b3a] to-[#23634b] px-4 py-2 text-center text-[#fff4d7]">
                   <p className="text-[10px] font-semibold tracking-[0.28em] text-[#e3ca8d]">
                     ISLAMIC LUNAR CALENDAR
                   </p>

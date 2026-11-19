@@ -420,7 +420,156 @@ const disableCompass = () => {
     Math.min(normalize(qibla - heading), normalize(heading - qibla)) <= 5;
 
   return (
-    <div className="relative mx-auto flex h-full max-h-[calc(100dvh-32px)] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-white to-emerald-50 px-4 py-3 sm:rounded-3xl sm:border sm:border-emerald-100 sm:p-4">
+    <div className="qibla-panel relative mx-auto flex h-full max-h-[calc(100dvh-32px)] w-full max-w-md flex-col overflow-hidden rounded-[28px] px-4 py-3 sm:rounded-3xl sm:p-4">
+
+
+
+{/* Decorative Mosque Skyline */}
+
+<svg
+  className="qibla-skyline pointer-events-none absolute bottom-[75px] left-0 z-0 h-[125px] w-full"
+  viewBox="0 0 420 125"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+>
+  {/* Background landscape */}
+  <path
+    d="M0 100 Q80 72 150 98 T300 90 T420 98 V125 H0Z"
+    fill="#08718a"
+    opacity=".35"
+  />
+
+  {/* Back minarets */}
+  <g fill="#164d68">
+    <path d="M35 105 V45 H39 V35 H43 V45 H47 V105Z" />
+    <path d="M31 48 H51 L41 27Z" />
+    <path d="M33 65 H49 V69 H33Z" />
+
+    <path d="M370 105 V38 H374 V27 H378 V38 H382 V105Z" />
+    <path d="M366 40 H386 L376 18Z" />
+    <path d="M368 60 H384 V64 H368Z" />
+  </g>
+
+  {/* Main mosque body */}
+  <g fill="#06364f">
+
+    {/* Main building */}
+    <path d="
+      M95 110
+      V86
+      Q110 77 125 86
+      V75
+      Q160 65 195 75
+      V110Z
+    " />
+
+    {/* Central dome */}
+    <path d="
+      M135 76
+      C135 53 151 31 165 31
+      C179 31 195 53 195 76
+      Z
+    " />
+
+    {/* Dome base */}
+    <path d="M130 75 H200 V81 H130Z" />
+
+    {/* Small dome left */}
+    <path d="
+      M85 86
+      C85 70 96 57 108 57
+      C120 57 130 70 130 86Z
+    " />
+
+    {/* Small dome right */}
+    <path d="
+      M200 86
+      C200 70 211 57 223 57
+      C235 57 245 70 245 86Z
+    " />
+
+    {/* Side wings */}
+    <path d="M65 110 V94 Q85 80 105 94 V110Z" />
+    <path d="M225 110 V94 Q245 80 265 94 V110Z" />
+
+    {/* Main entrance arch */}
+    <path d="
+      M148 110
+      V97
+      A17 17 0 0 1 182 97
+      V110Z
+    " fill="#021f34" />
+
+    {/* Side arched windows */}
+    <path d="
+      M108 105 V96
+      A7 7 0 0 1 122 96
+      V105Z
+    " fill="#021f34" />
+
+    <path d="
+      M208 105 V96
+      A7 7 0 0 1 222 96
+      V105Z
+    " fill="#021f34" />
+  </g>
+
+  {/* Main minarets */}
+  <g fill="#082e47">
+    <path d="
+      M265 110
+      V42 H270 V35 H274 V42 H279 V110Z
+    " />
+    <path d="M261 45 H283 L272 22Z" />
+    <path d="M263 62 H281 V67 H263Z" />
+    <path d="M263 82 H281 V86 H263Z" />
+
+    <path d="
+      M320 110
+      V51 H325 V44 H329 V51 H334 V110Z
+    " />
+    <path d="M316 53 H338 L327 30Z" />
+    <path d="M318 71 H336 V76 H318Z" />
+  </g>
+
+  {/* Dome crescent and finials */}
+  <g fill="#d9e6ee">
+    <path d="M165 31 V17 H167 V31Z" />
+    <path d="
+      M159 17
+      A6 6 0 1 0 170 12
+      A5 5 0 1 1 159 17
+    " />
+    <path d="M108 57 V49 H110 V57Z" />
+    <path d="M223 57 V49 H225 V57Z" />
+    <path d="M272 22 V13 H274 V22Z" />
+    <path d="M327 30 V21 H329 V30Z" />
+  </g>
+
+  {/* Decorative dome ribs */}
+  <g
+    fill="none"
+    stroke="#6b9caf"
+    strokeWidth="1"
+    opacity=".55"
+  >
+    <path d="M165 35 Q150 53 150 75" />
+    <path d="M165 35 Q180 53 180 75" />
+  </g>
+
+  {/* Foreground landscape */}
+  <path
+    d="
+      M0 111
+      Q60 94 110 108
+      Q180 120 240 106
+      Q330 91 420 108
+      V125 H0Z
+    "
+    fill="#022b43"
+  />
+</svg>
+
 
 
 
@@ -479,12 +628,17 @@ const disableCompass = () => {
         )}
       </div>
 
-           {/* Live Compass ON/OFF */}
-<div className="absolute left-5 top-3 z-50">
+
+{/* Live Compass Toggle */}
+<div className="absolute left-4 top-3 z-50 flex items-center gap-2">
+  <span className="text-[10px] font-semibold tracking-wide text-zinc-100">
+    Enable Compass
+  </span>
+
   <button
     type="button"
     role="switch"
-    aria-label="Activate live compass"
+    aria-label="Live compass"
     aria-checked={active}
     onClick={() => {
       if (active) {
@@ -493,59 +647,57 @@ const disableCompass = () => {
         enableCompass();
       }
     }}
-  className={`relative h-6 w-11 rounded-full shadow-inner transition-colors duration-300 ${
-  active ? "bg-emerald-600" : "bg-zinc-300"
-}`}
+    className={`relative h-5 w-9 rounded-full transition-colors duration-300 ${
+      active ? "bg-emerald-700" : "bg-zinc-300"
+    }`}
   >
-   <span
- className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-md transition-all duration-300 ${
-  active ? "left-6" : "left-1"
-}`}
-/>
+    <span
+      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+        active ? "left-[18px]" : "left-0.5"
+      }`}
+    />
   </button>
 </div>
-      {/* Header */}
-      <div className="mb-3 shrink-0 text-center">
-       
 
-        <h2 className="mt-2 text-2xl font-extrabold tracking-wide text-zinc-500 [text-shadow:0_1px_0_#fff,0_2px_1px_rgba(0,0,0,0.25)]">
-          ISLAMIC COMPASS
-        </h2>
-      </div>
-
-        {/* Qibla status */}
+   
     
 
-<div className="mb-3 rounded-xl border  bg-gradient-to-r from-white via-emerald-50 to-white p-3 text-center ">
+
+{/* Qibla Status */}
+<div className="relative z-10 mb-2 rounded-xl p-2 text-center">
   {aligned ? (
-    <div className="flex items-center justify-center gap-2 rounded-lg bg-green-100 px-3 py-2 text-sm font-semibold text-emerald-800">
-      <Kaaba size={18} className="text-emerald-700" />
+    <div className="flex items-center justify-center gap-2 rounded-lg bg-white/90 px-3 py-2 text-sm font-semibold text-[#07556e]">
+      <Kaaba size={18} />
       <span>Qibla Aligned</span>
-      <span className="text-emerald-600">✓</span>
+      <span>✓</span>
     </div>
   ) : heading !== null && qibla !== null ? (
-    <p className="flex items-center justify-center gap-2 text-sm font-medium text-emerald-800">
-      <span className="animate-pulse">↑</span>
-      Rotate your phone to face Qibla
+    <p className="text-sm font-medium text-white">
+      ↑ Rotate your phone to face Qibla
     </p>
   ) : (
-    <p
-    dir="rtl"
-    lang="ar"
-    className="text-center font-[Amiri] text-[25px] leading-[1.1] font-bold text-emerald-900"
-  >
-    فَلَنُوَلِّيَنَّكَ قِبْلَةً تَرْضَاهَ     
-  </p>
-
+    <p className="text-sm font-medium text-white">
+      Enable your compass to find Qibla
+    </p>
   )}
 </div>
 
+{/* Quranic Calligraphy - Always Visible */}
+<div className="qibla-verse relative z-10 mb-3 w-full shrink-0">
+  <img
+    src="/asset/qibla.png"
+    alt="Quranic Qibla verse"
+    className="block  w-full rounded-xl object-contain"
+  />
+</div>
+
+
 
       {/* Main compass */}
-      <div className="relative mx-auto aspect-square w-full max-w-[270px] shrink-0 sm:max-w-[310px]">
+      <div className="relative z-10 mx-auto aspect-square w-full max-w-[320px] shrink-0">
         {/* Outer border */}
         <div className="absolute inset-0 rounded-full border-[9px] border-zinc-200 bg-gradient-to-br from-white via-zinc-100 to-zinc-400 shadow-[0_3px_8px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.9)]">
-          <div className="absolute inset-[5px] rounded-full border-2 border-emerald-100" />
+          <div className="absolute inset-[5px] rounded-full border-2 border-slate-100" />
 
           {/* Degree marks */}
           <div
@@ -571,16 +723,16 @@ const disableCompass = () => {
       
 
 {/* Centered Qibla Details */}
-<div className="mt-2 flex w-full shrink-0 justify-center">
-  <div className="w-fit rounded-xl border border-emerald-100/80 bg-white/90 px-3 py-1.5 shadow-sm">
-    <div className="grid grid-cols-2 divide-x divide-emerald-100">
+<div className="relative z-10 mt-2 flex w-full shrink-0 justify-center">
+  <div className="qibla-info mx-auto w-fit rounded-2xl px-4 py-2">
+    <div className="grid grid-cols-2 divide-x divide-slate-100">
 
       {/* Qibla Bearing */}
       <div className="px-3 text-center">
         <p className="text-[9px] font-semibold leading-tight tracking-wide text-zinc-400">
           QIBLA BEARING
         </p>
-        <p className="mt-0.5 text-lg font-bold tabular-nums text-emerald-800">
+        <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-800">
           {qibla !== null ? `${qibla.toFixed(1)}°` : "--"}
         </p>
       </div>
