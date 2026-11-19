@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+
 import {
   Settings,
   Trash2,
@@ -9,6 +10,12 @@ import {
   BookOpenText,
   BookMarked,
   Compass,
+  Navigation,
+  Moon,
+  Sunrise,
+  Sun,
+  Sunset,
+  CloudSun,
 } from "lucide-react";
 import QiblaCompass from "./components/QiblaCompass";
 import RamadanCalendar from "./components/RamadanCalender";
@@ -111,10 +118,107 @@ const getCalendarDates = (selectedTimezone) => {
   };
 };
 
+const getQamariMonthCalendar = (currentTime, selectedTimezone) => {
+  const islamicFormatter = new Intl.DateTimeFormat(
+    "en-u-ca-islamic-umalqura-nu-latn",
+    {
+      timeZone: selectedTimezone,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    },
+  );
+  const gregorianFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: selectedTimezone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const solarFormatter = new Intl.DateTimeFormat("en-u-ca-persian-nu-latn", {
+    timeZone: selectedTimezone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const parts = (formatter, date) =>
+    Object.fromEntries(
+      formatter
+        .formatToParts(date)
+        .filter((p) => p.type !== "literal")
+        .map((p) => [p.type, Number(p.value)]),
+    );
+  const todayParts = parts(gregorianFormatter, currentTime);
+  const todayKey = `${todayParts.year}-${todayParts.month}-${todayParts.day}`;
+  const todayUtc = new Date(
+    Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day, 12),
+  );
+  const target = parts(islamicFormatter, todayUtc);
+  const first = new Date(todayUtc);
+  first.setUTCDate(first.getUTCDate() - (target.day - 1));
+  const solarMonths = [
+    "حمل",
+    "ثور",
+    "جوزا",
+    "سرطان",
+    "اسد",
+    "سنبله",
+    "میزان",
+    "عقرب",
+    "قوس",
+    "جدی",
+    "دلو",
+    "حوت",
+  ];
+  const lunarMonths = [
+    "محرم",
+    "صفر",
+    "ربیع‌الاول",
+    "ربیع‌الثانی",
+    "جمادی‌الاول",
+    "جمادی‌الثانی",
+    "رجب",
+    "شعبان",
+    "رمضان",
+    "شوال",
+    "ذوالقعده",
+    "ذوالحجه",
+  ];
+  const days = [];
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(first);
+    date.setUTCDate(first.getUTCDate() + i);
+    const hijri = parts(islamicFormatter, date);
+    if (hijri.month !== target.month || hijri.year !== target.year) break;
+    const solar = parts(solarFormatter, date);
+    const gregorian = parts(gregorianFormatter, date);
+    const gregorianMonth = new Intl.DateTimeFormat("en-US", {
+      timeZone: selectedTimezone,
+      month: "short",
+    }).format(date);
+    const key = `${gregorian.year}-${gregorian.month}-${gregorian.day}`;
+    days.push({
+      hijriDay: hijri.day,
+      solarDay: solar.day,
+      solarMonth: solarMonths[solar.month - 1],
+      gregorianDay: gregorian.day,
+      gregorianMonth,
+      weekday: date.getUTCDay(),
+      isToday: key === todayKey,
+    });
+  }
+  return {
+    month: lunarMonths[target.month - 1],
+    year: target.year,
+    days,
+    offset: first.getUTCDay(),
+  };
+};
+
 const App = () => {
   const [locations, setLocations] = useState([]);
   const [showSavedCities, setShowSavedCities] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [deviceHeading, setDeviceHeading] = useState(null);
   const [showRamadanCalendar, setShowRamadanCalendar] = useState(
     () => localStorage.getItem("showRamadanCalendar") === "true",
   );
@@ -226,6 +330,92 @@ const App = () => {
     localStorage.setItem("asrMethod", asrMethod);
   }, [asrMethod]);
   const [activeCoordinates, setActiveCoordinates] = useState(null);
+
+  // One live compass heading shared by the small arrow and full Qibla compass.
+  const normalizeDegrees = (value) => ((value % 360) + 360) % 360;
+
+  useEffect(() => {
+    if (!activeCoordinates || typeof window === "undefined") return;
+
+    const normalize = (value) => ((value % 360) + 360) % 360;
+
+    const eventName =
+      "ondeviceorientationabsolute" in window
+        ? "deviceorientationabsolute"
+        : "deviceorientation";
+
+    const handleOrientation = (event) => {
+      let heading = null;
+
+      if (typeof event.webkitCompassHeading === "number") {
+        heading = event.webkitCompassHeading;
+      } else if (typeof event.alpha === "number") {
+        heading = 360 - event.alpha;
+      }
+
+      if (heading !== null) {
+        setDeviceHeading(normalize(heading));
+      }
+    };
+
+    window.addEventListener(eventName, handleOrientation, true);
+
+    return () => {
+      window.removeEventListener(eventName, handleOrientation, true);
+    };
+  }, [activeCoordinates]);
+
+  // Initial bearing from the selected location to the Kaaba.
+  const getQiblaBearing = () => {
+    if (!activeCoordinates) return null;
+
+    const KAABA = {
+      lat: 21.4225,
+      lon: 39.8262,
+    };
+
+    const rad = (value) => (value * Math.PI) / 180;
+    const normalize = (value) => ((value % 360) + 360) % 360;
+
+    const latitude = rad(Number(activeCoordinates.latitude));
+    const longitude = rad(Number(activeCoordinates.longitude));
+    const kaabaLatitude = rad(KAABA.lat);
+    const deltaLongitude = rad(KAABA.lon - Number(activeCoordinates.longitude));
+
+    const y = Math.sin(deltaLongitude) * Math.cos(kaabaLatitude);
+
+    const x =
+      Math.cos(latitude) * Math.sin(kaabaLatitude) -
+      Math.sin(latitude) * Math.cos(kaabaLatitude) * Math.cos(deltaLongitude);
+
+    return normalize((Math.atan2(y, x) * 180) / Math.PI);
+  };
+
+  // Rotate the arrow by the Qibla bearing relative to the phone's live heading.
+  const getCompassNeedleRotation = () => {
+    const bearing = getQiblaBearing();
+
+    if (bearing === null || deviceHeading === null) return 0;
+
+    return (((bearing - deviceHeading) % 360) + 360) % 360;
+  };
+
+  const openQiblaCompass = async () => {
+    // iOS requires permission to be requested directly from a user gesture.
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function"
+    ) {
+      try {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== "granted") setDeviceHeading(null);
+      } catch {
+        setDeviceHeading(null);
+      }
+    }
+    setActiveSection("qibla");
+  };
+
   const [currentTime, setCurrentTime] = useState(new Date());
   // Prayer Alert Settings
   const [notificationPermission, setNotificationPermission] =
@@ -487,7 +677,7 @@ const App = () => {
   const searchCities = async () => {
     if (!citySearch.trim()) {
       setNotification({
-        message: error.message || "Fajr Adhan upload failed.",
+        message: "Please enter a city name to search.",
         type: "error",
       });
 
@@ -898,6 +1088,42 @@ const App = () => {
   };
 
   const nextPrayer = getNextPrayer();
+
+  // get current prayer
+  const getCurrentPrayer = () => {
+    if (!prayerTimes || !selectedTimezone) return null;
+
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: selectedTimezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(currentTime);
+
+    const hour = Number(parts.find((p) => p.type === "hour").value);
+    const minute = Number(parts.find((p) => p.type === "minute").value);
+
+    const nowMinutes = hour * 60 + minute;
+
+    const prayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+    let activePrayer = "Isha";
+
+    for (const name of prayerNames) {
+      if (!prayerTimes[name]) continue;
+
+      const [h, m] = prayerTimes[name].split(":").map(Number);
+
+      if (nowMinutes >= h * 60 + m) {
+        activePrayer = name;
+      }
+    }
+
+    return { name: activePrayer };
+  };
+
+  const currentPrayer = getCurrentPrayer();
+
   const requestNotificationPermission = async () => {
     if (!("Notification" in window)) {
       setNotificationPermission("unsupported");
@@ -1225,14 +1451,15 @@ const App = () => {
     return `${formattedHours}:${String(minutes).padStart(2, "0")} ${period}`;
   };
   const prayers = [
-    { name: "Fajr", time: prayerTimes?.Fajr },
-    { name: "Sunrise", time: prayerTimes?.Sunrise },
-    { name: "Dhuhr", time: prayerTimes?.Dhuhr },
-    { name: "Asr", time: prayerTimes?.Asr },
-    { name: "Maghrib", time: prayerTimes?.Maghrib },
-    { name: "Isha", time: prayerTimes?.Isha },
+    { name: "Fajr", time: prayerTimes?.Fajr, icon: Moon },
+    { name: "Sunrise", time: prayerTimes?.Sunrise, icon: Sunrise },
+    { name: "Dhuhr", time: prayerTimes?.Dhuhr, icon: Sun },
+    { name: "Asr", time: prayerTimes?.Asr, icon: CloudSun },
+    { name: "Maghrib", time: prayerTimes?.Maghrib, icon: Sunset },
+    { name: "Isha", time: prayerTimes?.Isha, icon: Moon },
   ];
   const calendarDates = getCalendarDates(selectedTimezone);
+  const qamariCalendar = getQamariMonthCalendar(currentTime, selectedTimezone);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#020b09] via-[#071b16] to-[#020806] px-2 p-4 text-[#f5eedc]">
@@ -1578,6 +1805,8 @@ const App = () => {
             <QiblaCompass
               coordinates={activeCoordinates}
               cityName={currentCity}
+              sharedHeading={deviceHeading}
+              sharedQiblaBearing={getQiblaBearing()}
             />
           </div>
         </div>
@@ -1589,21 +1818,31 @@ const App = () => {
           {/* Delicate certificate-style ornamental frame */}
           <div className="pointer-events-none absolute inset-2 rounded-[22px] border border-[#c5a45e]/50" />
 
-          <span className="pointer-events-none absolute left-4 top-2 text-xl text-[#b18b45]">
-            ❧
-          </span>
-          <span className="pointer-events-none absolute right-4 top-2 text-xl text-[#b18b45]">
-            ❧
-          </span>
-          <span className="pointer-events-none absolute bottom-2 left-4 text-xl text-[#b18b45]">
-            ❧
-          </span>
-          <span className="pointer-events-none absolute bottom-2 right-4 text-xl text-[#b18b45]">
-            ❧
-          </span>
+         
+       
           {/* Elegant Section Heading */}
 
           <div className="relative mb-6 overflow-hidden rounded-2xl border border-[#c5a45e]/50 bg-gradient-to-b from-[#fffdf8] to-[#f6efdf] px-5 py-7 text-center shadow-[0_5px_18px_rgba(139,107,50,0.10)]">
+            {/* Minimal live Qibla arrow — tap to open the full compass. */}
+            <button
+              type="button"
+              onClick={openQiblaCompass}
+              aria-label="Open live Qibla compass"
+              title="Qibla direction — click to open the full compass"
+              className="absolute right-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a66e28] md:flex"
+            >
+              <Navigation
+                size={29}
+                strokeWidth={1.8}
+                fill="#a66e28"
+                className="text-[#8c5d24] drop-shadow-[0_1px_1px_rgba(80,48,15,0.22)] transition-transform duration-100"
+                style={{
+                  transform: `rotate(${getCompassNeedleRotation()}deg)`,
+                  transition: "transform 0.15s ease-out",
+                }}
+              />
+            </button>
+
             {/* Delicate ornamental corners */}
 
             <div className="mb-3 flex items-center justify-center gap-3 text-xs font-medium tracking-[0.3em] text-[#a47c37]">
@@ -1669,250 +1908,544 @@ const App = () => {
           {/* Prayer Cards */}
 
           {prayerTimes && (
-            <div className="grid grid-cols-2 gap-2 sm:gap-5 lg:grid-cols-3">
-              {prayers.map((prayer) => {
-                const scenes = {
-                  Fajr: {
-                    sky: "from-[#101b3d] via-[#394d78] to-[#d18b82]",
-                    caption: "First Light",
-                    celestial: "☾",
-                    celestialStyle:
-                      "text-[#fff1c5] shadow-[0_0_35px_12px_rgba(255,235,180,0.18)]",
-                    stars: true,
-                    sun: false,
-                    glow: "bg-[#e4a58a]/30",
-                    horizon: "from-[#273b59] to-[#6c647d]",
-                  },
-                  Sunrise: {
-                    sky: "from-[#667b9d] via-[#e7a16d] to-[#ffe0a3]",
-                    caption: "A New Beginning",
-                    celestial: "☀",
-                    celestialStyle:
-                      "text-[#fff2b0] shadow-[0_0_55px_22px_rgba(255,207,117,0.5)]",
-                    stars: false,
-                    sun: true,
-                    glow: "bg-[#ffcf85]/40",
-                    horizon: "from-[#8b665a] to-[#e4a66e]",
-                  },
-                  Dhuhr: {
-                    sky: "from-[#2775ae] via-[#75b9df] to-[#d8e9e9]",
-                    caption: "Radiance of Day",
-                    celestial: "☀",
-                    celestialStyle:
-                      "text-[#fff4c4] shadow-[0_0_55px_24px_rgba(255,235,160,0.45)]",
-                    stars: false,
-                    sun: true,
-                    glow: "bg-[#fff1b5]/40",
-                    horizon: "from-[#527c78] to-[#8ba88a]",
-                  },
-                  Asr: {
-                    sky: "from-[#617a9c] via-[#d99a69] to-[#f4d1a0]",
-                    caption: "Afternoon Serenity",
-                    celestial: "☀",
-                    celestialStyle:
-                      "text-[#fff0bf] shadow-[0_0_45px_18px_rgba(255,213,145,0.4)]",
-                    stars: false,
-                    sun: true,
-                    glow: "bg-[#f5c48b]/40",
-                    horizon: "from-[#655b4c] to-[#c18a61]",
-                  },
-                  Maghrib: {
-                    sky: "from-[#34385d] via-[#bd665b] to-[#f2a45e]",
-                    caption: "Golden Sunset",
-                    celestial: "☼",
-                    celestialStyle:
-                      "text-[#ffe0a0] shadow-[0_0_45px_20px_rgba(255,166,91,0.4)]",
-                    stars: false,
-                    sun: true,
-                    glow: "bg-[#ffb66e]/40",
-                    horizon: "from-[#47394a] to-[#a45c4c]",
-                  },
-                  Isha: {
-                    sky: "from-[#071329] via-[#142b50] to-[#34476b]",
-                    caption: "Under the Stars",
-                    celestial: "☾",
-                    celestialStyle:
-                      "text-[#fff1c5] shadow-[0_0_35px_12px_rgba(255,235,180,0.18)]",
-                    stars: true,
-                    sun: false,
-                    glow: "bg-[#526a91]/20",
-                    horizon: "from-[#101e35] to-[#263c50]",
-                  },
-                };
+            <>
+              {/* MOBILE PRAYER TIMETABLE */}
+              <div className="md:hidden relative isolate overflow-hidden rounded-[26px] border border-[#c5a45e] bg-[#f3eee3] p-4 text-[#674b31] shadow-xl">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 -z-10 opacity-[0.12]"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle at center, #a88a60 1px, transparent 1px)",
+                    backgroundSize: "18px 18px",
+                  }}
+                />
 
-                const scene = scenes[prayer.name] || scenes.Dhuhr;
+                {/* Minimal live Qibla arrow — tap to open the full compass. */}
+                <button
+                  type="button"
+                  onClick={openQiblaCompass}
+                  aria-label="Open full Qibla compass"
+                  title="Live Qibla direction — tap to open the full compass"
+                  className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a66e28]"
+                >
+                 <div className="relative flex items-center justify-center">
 
-                return (
-                  <div
-                    key={prayer.name}
-                    className="group relative overflow-hidden rounded-t-[125px] rounded-b-2xl border-2 border-[#c5a45e] bg-[#174b3a] p-2 shadow-[0_7px_22px_rgba(23,75,58,0.20)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(155,125,65,0.25)]"
-                  >
-                    <div
-                      className={`relative min-h-[230px] sm:min-h-[275px] overflow-hidden rounded-t-[90px] sm:rounded-t-[115px] rounded-b-xl bg-gradient-to-b ${scene.sky}`}
+  {/* Rotating arrow and Kaaba together */}
+ 
+<div className="relative flex items-center justify-center">
+
+ {/* Rotate the Kaaba and arrow together */}
+<div
+  className="relative flex items-center justify-center"
+  style={{
+    transform: `rotate(${getCompassNeedleRotation()}deg)`,
+    transformOrigin: "center center",
+    transition: "transform 0.15s ease-out",
+  }}
+>
+
+
+
+  {/* Arrow */}
+  {/* <Navigation
+    className="YOUR_EXISTING_NAVIGATION_CLASSES"
+  /> */}
+
+{/* Single rotating Qibla arrow + Kaaba */}
+<div
+  className="flex items-center justify-center"
+  style={{
+  transform: `rotate(${getCompassNeedleRotation() + 30}deg)`,
+  transformOrigin: "center center",
+  transition: "transform 0.15s ease-out",
+}}
+>
+  <svg
+    viewBox="0 0 100 145"
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-10 w-8"
+  >
+    {/* Arrow pointing forward */}
+    <path
+      d="M50 4 L88 65 L50 48 L12 65 Z"
+      fill="#171717"
+      stroke="#B58A36"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+
+    {/* Kaaba body */}
+    <path
+      d="M8 76 L50 53 L92 76 L92 119 L50 143 L8 119 Z"
+      fill="#171717"
+      stroke="#B58A36"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+
+    {/* Golden belt */}
+    <path
+      d="M9 88 L50 111 L91 88"
+      fill="none"
+      stroke="#E5B83B"
+      strokeWidth="6"
+    />
+
+    {/* Kaaba door */}
+    <rect
+      x="64"
+      y="105"
+      width="10"
+      height="13"
+      fill="#D6AD50"
+      stroke="#A87922"
+      strokeWidth="1"
+    />
+  </svg>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+                </button>
+
+                {/* Day and Hijri date */}
+                <div className="text-center">
+                  <p className="font-serif text-xl text-[#75583a]">
+                    {currentTime.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      timeZone: selectedTimezone,
+                    })}
+                  </p>
+                  <p className="mt-1 font-serif text-sm text-[#8b704d]">
+                    {calendarDates.lunar.day} {calendarDates.lunar.month}{" "}
+                    {calendarDates.lunar.year}
+                  </p>
+                  <div className="mx-auto mt-3 h-px w-32 bg-[#c5a45e]/70" />
+                </div>
+
+                {/* Next prayer and live clock */}
+                <div className="mt-5 grid grid-cols-2 items-center gap-3">
+                  <div className="text-center">
+                    <p className="text-xs font-medium text-[#96764d]">
+                      Next Prayer
+                    </p>
+                    <p className="mt-1 font-serif text-2xl font-bold text-[#81552c]">
+                      {nextPrayer?.time.toLocaleTimeString("en-US", {
+                        timeZone: selectedTimezone,
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#876440]">
+                      {nextPrayer?.name}
+                    </p>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-xs font-medium text-[#96764d]">
+                      Current Time
+                    </p>
+                    <p
+                      className="mt-1 text-3xl font-bold tabular-nums tracking-wider text-[#49301e]"
+                      style={{ fontFamily: "'Orbitron', sans-serif" }}
                     >
-                      {/* Atmospheric glow */}
+                      {currentTime
+                        .toLocaleTimeString("en-US", {
+                          timeZone: selectedTimezone,
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })
+                        .replace(/\s?(AM|PM)/, "")}
+                    </p>
+                    <p className="text-xs font-semibold text-[#96764d]">
+                      {currentTime
+                        .toLocaleTimeString("en-US", {
+                          timeZone: selectedTimezone,
+                          hour: "2-digit",
+                          hour12: true,
+                        })
+                        .slice(-2)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Countdown */}
+                {nextPrayer && (
+                  <div className="mt-4 rounded-xl border border-[#c5a45e]/50 bg-[#e9dfce] px-3 py-3 text-center">
+                    <p className="text-[10px] font-semibold tracking-[0.25em] text-[#96764d]">
+                      TIME REMAINING
+                    </p>
+                    <p
+                      className="mt-1 text-4xl font-bold tabular-nums tracking-[0.12em] text-[#50351f]"
+                      style={{ fontFamily: "'Orbitron', sans-serif" }}
+                    >
+                      {getCountdown()}
+                    </p>
+                  </div>
+                )}
+
+                {/* Decorative divider */}
+                <div className="my-5 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-[#c5a45e]/70" />
+                  <span className="text-lg text-[#a17b46]">۞</span>
+                  <span className="h-px flex-1 bg-[#c5a45e]/70" />
+                </div>
+
+                {/* Prayer times */}
+                <div className="space-y-0.5">
+                  {prayers.map((prayer) => {
+                    const PrayerIcon = prayer.icon;
+
+                    return (
                       <div
-                        className={`absolute left-1/2 top-[24%] h-32 w-32 -translate-x-1/2 rounded-full blur-3xl ${scene.glow}`}
-                      />
+                        key={prayer.name}
+                        className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
+                          currentPrayer?.name === prayer.name
+                            ? "border border-[#c5a45e]/60 bg-[#e8dcc5]"
+                            : "border-b border-[#c5a45e]/20"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <PrayerIcon className="h-5 w-5 text-[#b58a43]" />
 
-                      {/* Stars */}
-                      {scene.stars && (
-                        <div className="absolute inset-0 text-[#fff3d0]">
-                          {[
-                            ["15%", "17%"],
-                            ["28%", "30%"],
-                            ["72%", "16%"],
-                            ["83%", "35%"],
-                            ["42%", "12%"],
-                            ["64%", "43%"],
-                            ["20%", "47%"],
-                            ["91%", "12%"],
-                          ].map(([left, top], i) => (
-                            <span
-                              key={i}
-                              className="absolute text-xs opacity-80"
-                              style={{ left, top }}
-                            >
-                              ✦
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Sun or crescent */}
-                      <div className="absolute left-1/2 top-[24%] -translate-x-1/2">
-                        <div
-                          className={`flex h-16 w-16 items-center justify-center rounded-full ${scene.celestialStyle}`}
-                        >
-                          <span className="text-5xl">{scene.celestial}</span>
-                        </div>
-                      </div>
-
-                      {/* Soft clouds */}
-                      <div className="absolute left-[8%] top-[42%] h-4 w-20 rounded-full bg-white/20 blur-md" />
-                      <div className="absolute right-[8%] top-[48%] h-3 w-16 rounded-full bg-white/20 blur-md" />
-
-                      {/* Distant mountains */}
-                      <div
-                        className={`absolute bottom-[24%] h-20 w-full bg-gradient-to-t ${scene.horizon}`}
-                        style={{
-                          clipPath:
-                            "polygon(0 75%, 18% 30%, 32% 65%, 52% 12%, 70% 62%, 86% 25%, 100% 70%, 100% 100%, 0 100%)",
-                        }}
-                      />
-
-                      {/* Mosque silhouette */}
-                      <div className="absolute bottom-[19%] left-0 right-0 flex items-end justify-center text-[#102f2b]">
-                        <svg
-                          viewBox="0 0 300 95"
-                          className="w-full max-w-[280px] drop-shadow-md"
-                          fill="currentColor"
-                        >
-                          <path d="M20 95V48H55V95H20ZM62 95V35Q80 5 98 35V95H62ZM103 95V48H197V95H103ZM202 95V35Q220 5 238 35V95H202ZM245 95V48H280V95H245Z" />
-                          <path d="M125 95V49Q150 8 175 49V95H125Z" />
-                          <path d="M145 30V13H155V30Z M150 13L150 3L157 12Z" />
-                          <path d="M35 48V15H40V48ZM32 15L37 2L43 15ZM260 48V15H265V48ZM257 15L262 2L268 15Z" />
-                          <path
-                            d="M137 95V66Q150 48 163 66V95Z"
-                            fill="#d4b875"
-                            opacity=".75"
-                          />
-                        </svg>
-                      </div>
-
-                      {/* Foreground landscape */}
-                      <div className="absolute bottom-0 h-[25%] w-full bg-gradient-to-t from-[#0b2923] via-[#174b3a] to-[#174b3a]/80" />
-
-                      {/* Prayer information */}
-                      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-[#09251f] via-[#12382e]/90 to-transparent px-3 pb-6 pt-12 text-center">
-                        <h3 className="font-serif text-2xl font-semibold tracking-wide text-[#fff4d7]">
-                          {prayer.name}
-                        </h3>
-
-                        <div className="my-2 flex items-center justify-center gap-2">
-                          <div className="h-px w-8 bg-[#d8bd78]" />
-                          <span className="text-xs text-[#e6ce91]">✧</span>
-                          <div className="h-px w-8 bg-[#d8bd78]" />
+                          <span className="font-serif text-base font-medium text-[#795738]">
+                            {prayer.name}
+                          </span>
                         </div>
 
-                        <p
-                          className="text-1xl sm:text-3xl font-bold tabular-nums tracking-wider text-[#fff1c9]"
+                        <span
+                          className="text-lg font-bold tabular-nums tracking-wider text-[#49301e]"
                           style={{ fontFamily: "'Orbitron', sans-serif" }}
                         >
                           {formatTime(prayer.time)}
-                        </p>
+                        </span>
                       </div>
+                    );
+                  })}
+                </div>
+                {/* Footer */}
+                <div className="mt-5 text-center">
+                  <p className="font-serif text-lg !text-emerald-700">
+                    ﴾ إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا
+                    مَوْقُوتًا ﴿
+                  </p>
+                </div>
+              </div>
 
-                      {/* Delicate inner gold arch */}
-                      <div className="pointer-events-none absolute inset-2 rounded-t-[105px] rounded-b-lg border border-[#e5ca83]/60" />
+              {/* DESKTOP PRAYER CARDS - ORIGINAL DESIGN */}
+              <div className="hidden md:grid grid-cols-2 gap-2 sm:gap-5 lg:grid-cols-3">
+                {prayers.map((prayer) => {
+                  const scenes = {
+                    Fajr: {
+                      sky: "from-[#101b3d] via-[#394d78] to-[#d18b82]",
+                      caption: "First Light",
+                      celestial: "☾",
+                      celestialStyle:
+                        "text-[#fff1c5] shadow-[0_0_35px_12px_rgba(255,235,180,0.18)]",
+                      stars: true,
+                      sun: false,
+                      glow: "bg-[#e4a58a]/30",
+                      horizon: "from-[#273b59] to-[#6c647d]",
+                    },
+                    Sunrise: {
+                      sky: "from-[#667b9d] via-[#e7a16d] to-[#ffe0a3]",
+                      caption: "A New Beginning",
+                      celestial: "☀",
+                      celestialStyle:
+                        "text-[#fff2b0] shadow-[0_0_55px_22px_rgba(255,207,117,0.5)]",
+                      stars: false,
+                      sun: true,
+                      glow: "bg-[#ffcf85]/40",
+                      horizon: "from-[#8b665a] to-[#e4a66e]",
+                    },
+                    Dhuhr: {
+                      sky: "from-[#2775ae] via-[#75b9df] to-[#d8e9e9]",
+                      caption: "Radiance of Day",
+                      celestial: "☀",
+                      celestialStyle:
+                        "text-[#fff4c4] shadow-[0_0_55px_24px_rgba(255,235,160,0.45)]",
+                      stars: false,
+                      sun: true,
+                      glow: "bg-[#fff1b5]/40",
+                      horizon: "from-[#527c78] to-[#8ba88a]",
+                    },
+                    Asr: {
+                      sky: "from-[#617a9c] via-[#d99a69] to-[#f4d1a0]",
+                      caption: "Afternoon Serenity",
+                      celestial: "☀",
+                      celestialStyle:
+                        "text-[#fff0bf] shadow-[0_0_45px_18px_rgba(255,213,145,0.4)]",
+                      stars: false,
+                      sun: true,
+                      glow: "bg-[#f5c48b]/40",
+                      horizon: "from-[#655b4c] to-[#c18a61]",
+                    },
+                    Maghrib: {
+                      sky: "from-[#34385d] via-[#bd665b] to-[#f2a45e]",
+                      caption: "Golden Sunset",
+                      celestial: "☼",
+                      celestialStyle:
+                        "text-[#ffe0a0] shadow-[0_0_45px_20px_rgba(255,166,91,0.4)]",
+                      stars: false,
+                      sun: true,
+                      glow: "bg-[#ffb66e]/40",
+                      horizon: "from-[#47394a] to-[#a45c4c]",
+                    },
+                    Isha: {
+                      sky: "from-[#071329] via-[#142b50] to-[#34476b]",
+                      caption: "Under the Stars",
+                      celestial: "☾",
+                      celestialStyle:
+                        "text-[#fff1c5] shadow-[0_0_35px_12px_rgba(255,235,180,0.18)]",
+                      stars: true,
+                      sun: false,
+                      glow: "bg-[#526a91]/20",
+                      horizon: "from-[#101e35] to-[#263c50]",
+                    },
+                  };
+
+                  const scene = scenes[prayer.name] || scenes.Dhuhr;
+
+                  return (
+                    <div
+                      key={prayer.name}
+                      className="group relative overflow-hidden rounded-t-[125px] rounded-b-2xl border-2 border-[#c5a45e] bg-[#174b3a] p-2 shadow-[0_7px_22px_rgba(23,75,58,0.20)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(155,125,65,0.25)]"
+                    >
+                      <div
+                        className={`relative min-h-[230px] sm:min-h-[275px] overflow-hidden rounded-t-[90px] sm:rounded-t-[115px] rounded-b-xl bg-gradient-to-b ${scene.sky}`}
+                      >
+                        {/* Atmospheric glow */}
+                        <div
+                          className={`absolute left-1/2 top-[24%] h-32 w-32 -translate-x-1/2 rounded-full blur-3xl ${scene.glow}`}
+                        />
+
+                        {/* Stars */}
+                        {scene.stars && (
+                          <div className="absolute inset-0 text-[#fff3d0]">
+                            {[
+                              ["15%", "17%"],
+                              ["28%", "30%"],
+                              ["72%", "16%"],
+                              ["83%", "35%"],
+                              ["42%", "12%"],
+                              ["64%", "43%"],
+                              ["20%", "47%"],
+                              ["91%", "12%"],
+                            ].map(([left, top], i) => (
+                              <span
+                                key={i}
+                                className="absolute text-xs opacity-80"
+                                style={{ left, top }}
+                              >
+                                ✦
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Sun or crescent */}
+                        <div className="absolute left-1/2 top-[24%] -translate-x-1/2">
+                          <div
+                            className={`flex h-16 w-16 items-center justify-center rounded-full ${scene.celestialStyle}`}
+                          >
+                            <span className="text-5xl">{scene.celestial}</span>
+                          </div>
+                        </div>
+
+                        {/* Soft clouds */}
+                        <div className="absolute left-[8%] top-[42%] h-4 w-20 rounded-full bg-white/20 blur-md" />
+                        <div className="absolute right-[8%] top-[48%] h-3 w-16 rounded-full bg-white/20 blur-md" />
+
+                        {/* Distant mountains */}
+                        <div
+                          className={`absolute bottom-[24%] h-20 w-full bg-gradient-to-t ${scene.horizon}`}
+                          style={{
+                            clipPath:
+                              "polygon(0 75%, 18% 30%, 32% 65%, 52% 12%, 70% 62%, 86% 25%, 100% 70%, 100% 100%, 0 100%)",
+                          }}
+                        />
+
+                        {/* Mosque silhouette */}
+                        <div className="absolute bottom-[19%] left-0 right-0 flex items-end justify-center text-[#102f2b]">
+                          <svg
+                            viewBox="0 0 300 95"
+                            className="w-full max-w-[280px] drop-shadow-md"
+                            fill="currentColor"
+                          >
+                            <path d="M20 95V48H55V95H20ZM62 95V35Q80 5 98 35V95H62ZM103 95V48H197V95H103ZM202 95V35Q220 5 238 35V95H202ZM245 95V48H280V95H245Z" />
+                            <path d="M125 95V49Q150 8 175 49V95H125Z" />
+                            <path d="M145 30V13H155V30Z M150 13L150 3L157 12Z" />
+                            <path d="M35 48V15H40V48ZM32 15L37 2L43 15ZM260 48V15H265V48ZM257 15L262 2L268 15Z" />
+                            <path
+                              d="M137 95V66Q150 48 163 66V95Z"
+                              fill="#d4b875"
+                              opacity=".75"
+                            />
+                          </svg>
+                        </div>
+
+                        {/* Foreground landscape */}
+                        <div className="absolute bottom-0 h-[25%] w-full bg-gradient-to-t from-[#0b2923] via-[#174b3a] to-[#174b3a]/80" />
+
+                        {/* Prayer information */}
+                        <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-[#09251f] via-[#12382e]/90 to-transparent px-3 pb-6 pt-12 text-center">
+                          <h3 className="font-serif text-2xl font-semibold tracking-wide text-[#fff4d7]">
+                            {prayer.name}
+                          </h3>
+
+                          <div className="my-2 flex items-center justify-center gap-2">
+                            <div className="h-px w-8 bg-[#d8bd78]" />
+                            <span className="text-xs text-[#e6ce91]">✧</span>
+                            <div className="h-px w-8 bg-[#d8bd78]" />
+                          </div>
+
+                          <p
+                            className="text-1xl sm:text-3xl font-bold tabular-nums tracking-wider text-[#fff1c9]"
+                            style={{ fontFamily: "'Orbitron', sans-serif" }}
+                          >
+                            {formatTime(prayer.time)}
+                          </p>
+                        </div>
+
+                        {/* Delicate inner gold arch */}
+                        <div className="pointer-events-none absolute inset-2 rounded-t-[105px] rounded-b-lg border border-[#e5ca83]/60" />
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* Next Prayer Time - DESKTOP ONLY (mobile has its own countdown above) */}
+              {nextPrayer && (
+                <div className="hidden md:block relative mb-8 mt-4 overflow-hidden rounded-[2rem] border border-[#c5a45e]/70 bg-gradient-to-br from-[#092f25] via-[#14513d] to-[#08291f] px-6 py-9 text-center text-[#fff7e5] shadow-[0_12px_35px_rgba(8,47,36,0.25)] sm:px-10">
+                  {/* Decorative background details */}
+                  <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full border border-[#d8bd7b]/15" />
+                  <div className="pointer-events-none absolute -right-16 -bottom-16 h-56 w-56 rounded-full border border-[#d8bd7b]/15" />
+
+                  <div className="relative mx-auto max-w-xl">
+                    {/* Gold ornament */}
+                    <div className="mb-4 flex items-center justify-center gap-3 text-[#d9bd79]">
+                      <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d9bd79]" />
+                      <span className="text-xl">✧</span>
+                      <span className="text-xs tracking-[0.35em]">
+                        NEXT PRAYER
+                      </span>
+                      <span className="text-xl">✧</span>
+                      <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d9bd79]" />
+                    </div>
+
+                    {/* Prayer name */}
+                    <h3 className="font-serif text-3xl font-semibold tracking-wide text-[#fff3d4] sm:text-5xl">
+                      {nextPrayer.name}
+                    </h3>
+
+                    {/* Prayer time */}
+                    <p className="mt-3 text-base tracking-[0.15em] text-[#e5d5a9]">
+                      {nextPrayer.time.toLocaleTimeString([], {
+                        timeZone: selectedTimezone,
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+
+                    {/* Countdown */}
+                    <div className="rounded-2xl mt-4 border border-[#d9bd79]/35 bg-black/15 px-5 py-5 shadow-inner">
+                      <p className="mb-2 text-[10px] font-medium tracking-[0.35em] text-[#d9bd79]">
+                        TIME REMAINING
+                      </p>
+
+                      <p
+                        className="text-4xl font-semibold tabular-nums tracking-[0.12em] text-white sm:text-5xl"
+                        style={{ fontFamily: "'Orbitron', sans-serif" }}
+                      >
+                        {getCountdown()}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 text-lg text-[#d9bd79]">☾ ✧ ☽</div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              )}
+
+              {/* MONTHLY QAMARI CALENDAR - RESPONSIVE */}
+              <section className="mt-7 overflow-hidden rounded-2xl border border-[#c5a45e]/70 bg-[#fffaf0] text-[#493a29] shadow-[0_8px_25px_rgba(23,75,58,0.12)]">
+                <div className="bg-gradient-to-r from-[#174b3a] to-[#23634b] px-4 py-4 text-center text-[#fff4d7]">
+                  <p className="text-[10px] font-semibold tracking-[0.28em] text-[#e3ca8d]">
+                    ISLAMIC LUNAR CALENDAR
+                  </p>
+                  <h2 className="mt-1 font-serif text-2xl font-semibold">
+                    {qamariCalendar.month} {qamariCalendar.year}
+                  </h2>
+                </div>
+                <div className="p-2 sm:p-4">
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                      (day) => (
+                        <div
+                          key={day}
+                          className="py-2 text-[10px] font-bold uppercase tracking-wide text-[#96764d] sm:text-xs"
+                        >
+                          {day}
+                        </div>
+                      ),
+                    )}
+                    {Array.from({ length: qamariCalendar.offset }, (_, i) => (
+                      <div
+                        key={`empty-${i}`}
+                        aria-hidden="true"
+                        className="min-h-[66px] sm:min-h-[82px]"
+                      />
+                    ))}
+                    {qamariCalendar.days.map((day) => (
+                      <div
+                        key={day.hijriDay}
+                        className={`flex min-h-[66px] flex-col items-center justify-center rounded-lg border px-0.5 py-1 sm:min-h-[82px] sm:rounded-xl sm:py-2 ${day.isToday ? "border-[#b18b45] bg-[#174b3a] text-white shadow-md ring-2 ring-[#d8bd78]/60" : "border-[#eadfc9] bg-[#f8f2e6] text-[#493a29]"}`}
+                        aria-current={day.isToday ? "date" : undefined}
+                      >
+                        <span
+                          className={`text-lg font-bold leading-tight tabular-nums sm:text-2xl ${day.isToday ? "text-[#fff1c9]" : "text-[#174b3a]"}`}
+                        >
+                          {day.hijriDay}
+                        </span>
+                        <span
+                          className={`mt-1 text-[9px] leading-tight sm:text-[11px] ${day.isToday ? "text-[#ead9ad]" : "text-[#94764d]"}`}
+                        >
+                          {day.solarDay} {day.solarMonth}
+                        </span>
+                        <span
+                          className={`text-[9px] leading-tight sm:text-[11px] ${day.isToday ? "text-white/75" : "text-[#9b9589]"}`}
+                        >
+                          {day.gregorianMonth} {day.gregorianDay}
+                        </span>
+                        {day.isToday && (
+                          <span className="mt-0.5 text-[8px] font-bold uppercase tracking-wider text-[#f1d58e]">
+                            Today
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t border-[#e8dcc6] pt-3 text-[10px] text-[#8a7657] sm:text-xs">
+                    <span>
+                      <strong className="text-[#174b3a]">Large:</strong> Qamari
+                    </span>
+                    <span>
+                      <strong className="text-[#94764d]">Small:</strong> Shamsi
+                    </span>
+                    <span>
+                      <strong className="text-[#9b9589]">Small:</strong> Miladi
+                    </span>
+                  </div>
+                </div>
+              </section>
+            </>
           )}
         </section>
-
-        {/* Next  Prayer Time */}
-        {nextPrayer && (
-          <div className="relative mb-8 mt-4 overflow-hidden rounded-[2rem] border border-[#c5a45e]/70 bg-gradient-to-br from-[#092f25] via-[#14513d] to-[#08291f] px-6 py-9 text-center text-[#fff7e5] shadow-[0_12px_35px_rgba(8,47,36,0.25)] sm:px-10">
-            {/* Decorative background details */}
-            <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full border border-[#d8bd7b]/15" />
-            <div className="pointer-events-none absolute -right-16 -bottom-16 h-56 w-56 rounded-full border border-[#d8bd7b]/15" />
-
-            <div className="relative mx-auto max-w-xl">
-              {/* Gold ornament */}
-              <div className="mb-4 flex items-center justify-center gap-3 text-[#d9bd79]">
-                <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d9bd79]" />
-                <span className="text-xl">✧</span>
-                <span className="text-xs tracking-[0.35em]">NEXT PRAYER</span>
-                <span className="text-xl">✧</span>
-                <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d9bd79]" />
-              </div>
-
-              {/* Prayer name */}
-              <h3 className="font-serif text-4xl font-semibold tracking-wide text-[#fff3d4] sm:text-5xl">
-                {nextPrayer.name}
-              </h3>
-
-              {/* Prayer time */}
-              <p className="mt-3 text-base tracking-[0.15em] text-[#e5d5a9]">
-                {nextPrayer.time.toLocaleTimeString([], {
-                  timeZone: selectedTimezone,
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-
-              {/* Decorative divider */}
-              <div className="my-7 flex items-center justify-center gap-3">
-                <span className="h-px w-16 bg-[#c5a45e]/50" />
-                <span className="text-[#d9bd79]">۞</span>
-                <span className="h-px w-16 bg-[#c5a45e]/50" />
-              </div>
-
-              {/* Countdown */}
-              <div className="rounded-2xl border border-[#d9bd79]/35 bg-black/15 px-5 py-5 shadow-inner">
-                <p className="mb-2 text-[10px] font-medium tracking-[0.35em] text-[#d9bd79]">
-                  TIME REMAINING
-                </p>
-
-                <p
-                  className="text-4xl font-semibold tabular-nums tracking-[0.12em] text-white sm:text-5xl"
-                  style={{ fontFamily: "'Orbitron', sans-serif" }}
-                >
-                  {getCountdown()}
-                </p>
-              </div>
-
-              <p className="mt-5 font-serif text-sm italic text-[#e8d9b5]">
-                Prepare your heart for prayer
-              </p>
-
-              <div className="mt-4 text-lg text-[#d9bd79]">☾ ✧ ☽</div>
-            </div>
-          </div>
-        )}
 
         {activeSection === "settings" && (
           <>
@@ -2678,10 +3211,14 @@ const App = () => {
         />
       )}
       {/* Regular Adhan audio player */}
-      <audio ref={adhanAudioRef} src={regularAdhanSrc} preload="auto" />
+      {regularAdhanSrc && (
+        <audio ref={adhanAudioRef} src={regularAdhanSrc} preload="auto" />
+      )}
 
       {/* Fajr Adhan audio player */}
-      <audio ref={fajrAdhanAudioRef} src={fajrAdhanSrc} preload="auto" />
+      {fajrAdhanSrc && (
+        <audio ref={fajrAdhanAudioRef} src={fajrAdhanSrc} preload="auto" />
+      )}
     </div>
   );
 };
