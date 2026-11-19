@@ -676,12 +676,9 @@ const disableCompass = () => {
     </span>
 
     <div className="relative flex items-center justify-center rounded-full border border-amber-300/60 bg-emerald-900/80 p-1 shadow-[0_0_12px_rgba(250,204,21,0.45)]">
-      <Kaaba size={27} />
+      <Kaaba size={35} />
     </div>
 
-    <span className="relative text-xs font-bold tracking-wide text-white">
-      Qibla Aligned
-    </span>
 
     <span className="relative animate-pulse text-lg font-bold text-emerald-200">
       ‹‹
