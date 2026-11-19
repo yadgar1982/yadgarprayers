@@ -666,20 +666,36 @@ const disableCompass = () => {
 {/* Qibla Status */}
 <div className="relative z-10 mb-2 rounded-xl p-2 text-center">
   {aligned ? (
-    <div className="flex items-center justify-center gap-2 rounded-lg bg-white/90 px-3 py-2 text-sm font-semibold text-[#07556e]">
-      <Kaaba size={18} />
-      <span>Qibla Aligned</span>
-      <span>✓</span>
+  <div className="relative mx-auto flex w-fit items-center justify-center gap-3 overflow-hidden rounded-full border border-emerald-300/70 bg-gradient-to-r from-emerald-950 via-emerald-700 to-emerald-950 px-5 py-2 shadow-[0_0_18px_rgba(16,185,129,0.45),inset_0_1px_5px_rgba(255,255,255,0.3)]">
+
+    {/* Shiny highlight */}
+    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-transparent" />
+
+    <span className="relative animate-pulse text-lg font-bold text-emerald-200">
+      ››
+    </span>
+
+    <div className="relative flex items-center justify-center rounded-full border border-amber-300/60 bg-emerald-900/80 p-1 shadow-[0_0_12px_rgba(250,204,21,0.45)]">
+      <Kaaba size={27} />
     </div>
-  ) : heading !== null && qibla !== null ? (
-    <p className="text-sm font-medium text-white">
-      ↑ Rotate your phone to face Qibla
-    </p>
-  ) : (
-    <p className="text-sm font-medium text-white">
-      Enable your compass to find Qibla
-    </p>
-  )}
+
+    <span className="relative text-xs font-bold tracking-wide text-white">
+      Qibla Aligned
+    </span>
+
+    <span className="relative animate-pulse text-lg font-bold text-emerald-200">
+      ‹‹
+    </span>
+  </div>
+) : heading !== null && qibla !== null ? (
+  <p className="text-sm font-medium text-white">
+    ↑ Rotate your phone to face Qibla
+  </p>
+) : (
+  <p className="text-sm font-medium text-white">
+    Enable your compass to find Qibla
+  </p>
+)}
 </div>
 
 {/* Quranic Calligraphy - Always Visible */}
