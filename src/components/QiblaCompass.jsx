@@ -98,6 +98,7 @@ function Kaaba({ size = 58 }) {
 }
 
 // Four-direction compass rose
+
 function CompassRose({ heading }) {
   return (
     <div
@@ -108,63 +109,132 @@ function CompassRose({ heading }) {
       }}
     >
       <svg viewBox="0 0 320 320" className="h-full w-full">
-        {/* Compass points */}
-        <g
-          stroke="#D8F3DF"
+        <defs>
+          <radialGradient id="compassFace">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="75%" stopColor="#f1f1ed" />
+            <stop offset="100%" stopColor="#d5d5d0" />
+          </radialGradient>
+
+          <linearGradient id="metalRing" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#777777" />
+            <stop offset="25%" stopColor="#ffffff" />
+            <stop offset="55%" stopColor="#888888" />
+            <stop offset="80%" stopColor="#eeeeee" />
+            <stop offset="100%" stopColor="#666666" />
+          </linearGradient>
+        </defs>
+
+        {/* Metallic compass rings */}
+        <circle cx="160" cy="160" r="155" fill="url(#metalRing)" />
+        <circle cx="160" cy="160" r="150" fill="#555555" />
+        <circle cx="160" cy="160" r="145" fill="url(#metalRing)" />
+        <circle cx="160" cy="160" r="139" fill="url(#compassFace)" />
+
+        {/* Inner silver border */}
+        <circle
+          cx="160"
+          cy="160"
+          r="133"
+          fill="none"
+          stroke="#777777"
           strokeWidth="1.5"
-          strokeLinejoin="round"
-        >
-          <path
-            d="M160 38 L177 144 L160 160 L143 144 Z"
-            fill="#2FA65D"
-          />
-          <path
-            d="M282 160 L176 177 L160 160 L176 143 Z"
-            fill="#248F50"
-          />
-          <path
-            d="M160 282 L143 176 L160 160 L177 176 Z"
-            fill="#2FA65D"
-          />
-          <path
-            d="M38 160 L144 143 L160 160 L144 177 Z"
-            fill="#248F50"
-          />
+        />
+
+        {/* Degree markings */}
+        {Array.from({ length: 360 }, (_, i) => {
+          const angle = (i * Math.PI) / 180;
+          const major = i % 15 === 0;
+          const medium = i % 5 === 0;
+
+          const outer = 130;
+          const inner = major ? 113 : medium ? 119 : 125;
+
+          return (
+            <line
+              key={i}
+              x1={160 + Math.sin(angle) * outer}
+              y1={160 - Math.cos(angle) * outer}
+              x2={160 + Math.sin(angle) * inner}
+              y2={160 - Math.cos(angle) * inner}
+              stroke="#292929"
+              strokeWidth={major ? 1.5 : medium ? 0.9 : 0.45}
+            />
+          );
+        })}
+
+        {/* Degree numbers */}
+        {Array.from({ length: 24 }, (_, i) => {
+          const angle = (i * 15 * Math.PI) / 180;
+          const value = i * 15;
+
+          return (
+            <text
+              key={value}
+              x={160 + Math.sin(angle) * 104}
+              y={160 - Math.cos(angle) * 104}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize="9"
+              fontWeight="600"
+              fill="#292929"
+            >
+              {value}
+            </text>
+          );
+        })}
+
+        {/* Inner decorative compass circles */}
+        <circle
+          cx="160"
+          cy="160"
+          r="76"
+          fill="none"
+          stroke="#999999"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx="160"
+          cy="160"
+          r="62"
+          fill="none"
+          stroke="#aaaaaa"
+          strokeWidth="1"
+        />
+        <circle
+          cx="160"
+          cy="160"
+          r="45"
+          fill="none"
+          stroke="#c0c0c0"
+          strokeWidth="1"
+        />
+
+        {/* Four-direction decorative compass rose */}
+        <g stroke="#777777" strokeWidth="1" strokeLinejoin="round">
+          <path d="M160 82 L170 150 L160 160 L150 150 Z" fill="#d4d4d4" />
+          <path d="M238 160 L170 170 L160 160 L170 150 Z" fill="#eeeeee" />
+          <path d="M160 238 L150 170 L160 160 L170 170 Z" fill="#d4d4d4" />
+          <path d="M82 160 L150 150 L160 160 L150 170 Z" fill="#eeeeee" />
         </g>
-
-        {/* Inner details */}
-        <circle
-          cx="160"
-          cy="160"
-          r="29"
-          fill="#319E5B"
-          fillOpacity=".25"
-          stroke="#299653"
-          strokeWidth="2"
-        />
-
-        {/* Center pivot */}
-        <circle
-          cx="160"
-          cy="160"
-          r="11"
-          fill="#39D45E"
-          stroke="white"
-          strokeWidth="3"
-        />
 
         {/* Cardinal directions */}
         <g
-          fontSize="17"
+          fontSize="15"
           fontWeight="bold"
           textAnchor="middle"
-          fill="#E33B42"
+          fill="#222222"
         >
-          <text x="160" y="24">N</text>
-          <text x="297" y="166">E</text>
-          <text x="160" y="307">S</text>
-          <text x="23" y="166">W</text>
+          <text x="160" y="72">N</text>
+          <text x="248" y="165">E</text>
+          <text x="160" y="260">S</text>
+          <text x="72" y="165">W</text>
         </g>
+
+        {/* Center pivot */}
+        <circle cx="160" cy="160" r="12" fill="#555555" />
+        <circle cx="160" cy="160" r="8" fill="url(#metalRing)" />
+        <circle cx="160" cy="160" r="3" fill="#333333" />
       </svg>
     </div>
   );
@@ -181,20 +251,31 @@ function QiblaMarker({ angle }) {
       }}
     >
       <div className="absolute left-1/2 top-1/2">
+
+      {/* Green Qibla handle — rotates together with the Kaaba */}
+<div
+  className="absolute left-1/2 top-0 z-0 h-[80px] w-[15px] -translate-x-1/2 -translate-y-full rounded-full"
+  style={{
+    background:
+     "linear-gradient(to top, #7a4b08 0%, #c58a20 18%, #d6bb33 38%, #d4a12e 52%,  #b87913 85%, #f5d77e 100%)",
+    boxShadow: "0 1px 5px rgba(150, 123, 5, 0.45)",
+    clipPath: "polygon(50% 0%, 100% 15%, 70% 100%, 30% 100%, 0% 15%)",
+  }}
+/>
         <div
           className="absolute left-0 top-0"
           style={{
             transform: "translate(-50%, -50%) translateY(-100px)",
           }}
         >
-          <div
-            className="flex h-[65px] w-[65px] items-center justify-center rounded-xl border-2 border-amber-400 bg-white shadow-[0_5px_15px_rgba(0,0,0,0.25)]"
-            style={{
-              transform: `rotate(${-angle}deg)`,
-            }}
-          >
-            <Kaaba size={59} />
-          </div>
+         <div
+  className="flex !h-[58px] !w-[42px] items-center justify-center"
+  style={{
+    transform: `rotate(${-angle}deg)`,
+  }}
+>
+  <Kaaba size={58} />
+</div>
         </div>
       </div>
     </div>
@@ -352,18 +433,16 @@ useEffect(() => {
           ISLAMIC COMPASS
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-emerald-950">
-          Qibla Direction
-        </h2>
-
-      
+<h2 className="mt-2 text-2xl font-extrabold tracking-wide text-zinc-500 [text-shadow:0_1px_0_#fff,0_2px_1px_rgba(0,0,0,0.25)]">
+  Qibla Direction
+</h2>
       </div>
 
       {/* Main compass */}
      <div className="relative mx-auto aspect-square w-full max-w-[270px] shrink-0 sm:max-w-[310px]">
 
         {/* Outer border */}
-        <div className="absolute inset-0 rounded-full border-[9px] border-emerald-700 bg-white shadow-lg">
+        <div className="absolute inset-0 rounded-full border-[9px] border-zinc-200 bg-gradient-to-br from-white via-zinc-100 to-zinc-400 shadow-[0_3px_8px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.9)]">
           <div className="absolute inset-[5px] rounded-full border-2 border-emerald-100" />
 
           {/* Degree marks */}
@@ -390,14 +469,15 @@ useEffect(() => {
       </div>
 
       {/* Qibla status */}
-      <div className="mt-5 rounded-xl bg-emerald-100 p-3 text-center">
+      <div className="mt-5 rounded-xl bg-zinc-100 p-3 text-center">
         {aligned ? (
-          <p className="font-bold text-emerald-800">
-            ✓ You are facing Qibla
-          </p>
+ <p className="flex items-center justify-center gap-2 rounded-xl border border-amber-300/60 bg-gradient-to-r from-zinc-950 via-zinc-800 to-zinc-950 px-3 py-3 text-center text-sm font-bold tracking-wide text-amber-200 shadow-[0_3px_12px_rgba(6,78,59,0.2)]">
+  <Kaaba size={26} />
+  <span>You are facing the Holy Kaaba.</span>
+</p>
         ) : heading !== null && qibla !== null ? (
           <p className="text-sm font-medium text-emerald-900">
-            Rotate your phone until the Kaaba reaches the top ↑
+            Rotate your phone until face Kaaba ↑
           </p>
         ) : (
           <p className="text-sm text-gray-600">

@@ -1850,11 +1850,11 @@ const App = () => {
       {/* Qibla Compass Modal */}
       {activeSection === "qibla" && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/60 px-4 pt-[calc(env(safe-area-inset-top)+80px)] pb-[calc(env(safe-area-inset-bottom)+20px)] backdrop-blur-sm sm:items-center sm:py-6"
           onClick={() => setActiveSection("")}
         >
           <div
-            className="relative w-full max-w-md rounded-2xl  bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-5 shadow-2xl"
+           className="relative my-auto max-h-[calc(100dvh-120px)] w-full max-w-md overflow-y-auto rounded-2xl bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-5 shadow-2xl sm:max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
