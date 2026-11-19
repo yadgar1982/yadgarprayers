@@ -660,11 +660,17 @@ const disableCompass = () => {
 </div>
 
    
-    
+{/* Qibla Alignment Visual Stage */}
+<div className="qibla-alignment-stage relative isolate flex w-full flex-col items-center">
+
+  {/* Emerald light beam */}
+  {aligned && (
+    <div className="qibla-connection-beam pointer-events-none absolute z-[25]" />
+  )}
 
 
 {/* Qibla Status */}
-<div className="relative z-10 mb-2 rounded-xl p-2 text-center">
+<div className="relative z-30 mb-2 rounded-xl p-2 text-center">
   {aligned ? (
   <div className="relative mx-auto flex w-fit items-center justify-center gap-3 overflow-hidden rounded-full border border-emerald-300/70 bg-gradient-to-r from-emerald-950 via-emerald-700 to-emerald-950 px-5 py-2 shadow-[0_0_18px_rgba(16,185,129,0.45),inset_0_1px_5px_rgba(255,255,255,0.3)]">
 
@@ -696,7 +702,9 @@ const disableCompass = () => {
 </div>
 
 {/* Quranic Calligraphy - Always Visible */}
-<div className="qibla-verse relative z-10 mb-3 w-full shrink-0">
+<div className={`qibla-verse relative z-30 mb-3 w-full shrink-0 ${
+  aligned ? "qibla-verse-lit" : ""
+}`}>
   <img
     src="/asset/qibla.png"
     alt="Quranic Qibla verse"
@@ -707,7 +715,7 @@ const disableCompass = () => {
 
 
       {/* Main compass */}
-      <div className="relative z-10 mx-auto aspect-square w-full max-w-[320px] shrink-0">
+      <div className="relative mx-auto aspect-square w-full max-w-[320px] shrink-0">
         {/* Outer border */}
         <div className="absolute inset-0 rounded-full border-[9px] border-zinc-200 bg-gradient-to-br from-white via-zinc-100 to-zinc-400 shadow-[0_3px_8px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.9)]">
           <div className="absolute inset-[5px] rounded-full border-2 border-slate-100" />
@@ -732,6 +740,9 @@ const disableCompass = () => {
           {qibla !== null && <QiblaMarker angle={relativeQibla} />}
         </div>
       </div>
+
+
+    </div>
         {/* Details */}
       
 

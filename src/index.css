@@ -377,3 +377,80 @@
   border: 1px solid #d4e8e9;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
 }
+
+
+
+
+
+
+
+
+/* =================================
+   QIBLA EMERALD LIGHT CONNECTION
+================================= */
+
+.qibla-connection-beam {
+  position: absolute;
+  top: 45px;
+  bottom: 55px;
+  left: 50%;
+  width: min(190px, 65%);
+  transform: translateX(-50%);
+
+  pointer-events: none;
+
+  /* Narrow near upper Kaaba, wide near compass */
+  clip-path: polygon(
+    50% 0%,
+    100% 100%,
+    0% 100%
+  );
+
+  background: linear-gradient(
+    to top,
+    rgba(16, 185, 129, 0.04) 0%,
+    rgba(16, 185, 129, 0.18) 35%,
+    rgba(52, 211, 153, 0.32) 75%,
+    rgba(110, 231, 183, 0.50) 100%
+  );
+
+  filter: blur(10px);
+  animation: qibla-beam-pulse 2s ease-in-out infinite alternate;
+}
+
+/* Bright central light */
+.qibla-connection-beam::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 3px;
+  transform: translateX(-50%);
+
+  background: linear-gradient(
+    to top,
+    rgba(167, 243, 208, 0.05),
+    rgba(110, 231, 183, 0.75),
+    rgba(167, 243, 208, 0.05)
+  );
+
+  filter: blur(3px);
+}
+
+/* Glow around Quranic calligraphy */
+.qibla-verse-lit {
+  box-shadow:
+    0 0 12px rgba(52, 211, 153, 0.35),
+    0 0 25px rgba(16, 185, 129, 0.18);
+
+  transition: box-shadow 0.4s ease;
+}
+
+@keyframes qibla-beam-pulse {
+  from {
+    opacity: 0.45;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
