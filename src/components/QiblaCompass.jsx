@@ -506,21 +506,19 @@ const disableCompass = () => {
 </div>
       {/* Header */}
       <div className="mb-3 shrink-0 text-center">
-        <p className="text-xs font-bold tracking-[3px] text-emerald-700">
-          ISLAMIC COMPASS
-        </p>
+       
 
         <h2 className="mt-2 text-2xl font-extrabold tracking-wide text-zinc-500 [text-shadow:0_1px_0_#fff,0_2px_1px_rgba(0,0,0,0.25)]">
-          Qibla Direction
+          ISLAMIC COMPASS
         </h2>
       </div>
 
         {/* Qibla status */}
     
 
-<div className="mb-3 rounded-xl border border-emerald-100 bg-gradient-to-r from-white via-emerald-50 to-white p-3 text-center shadow-sm">
+<div className="mb-3 rounded-xl border  bg-gradient-to-r from-white via-emerald-50 to-white p-3 text-center ">
   {aligned ? (
-    <div className="flex items-center justify-center gap-2 rounded-lg bg-emerald-100/70 px-3 py-2 text-sm font-semibold text-emerald-800">
+    <div className="flex items-center justify-center gap-2 rounded-lg bg-green-100 px-3 py-2 text-sm font-semibold text-emerald-800">
       <Kaaba size={18} className="text-emerald-700" />
       <span>Qibla Aligned</span>
       <span className="text-emerald-600">✓</span>
@@ -534,9 +532,9 @@ const disableCompass = () => {
     <p
     dir="rtl"
     lang="ar"
-    className="text-center font-[Amiri] text-[19px] leading-[2.1] text-emerald-900"
+    className="text-center font-[Amiri] text-[25px] leading-[1.1] font-bold text-emerald-900"
   >
-    فَلَنُوَلِّيَنَّكَ قِبْلَةً تَرْضَاهَا فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ
+    فَلَنُوَلِّيَنَّكَ قِبْلَةً تَرْضَاهَ     
   </p>
 
   )}
@@ -571,34 +569,39 @@ const disableCompass = () => {
       </div>
         {/* Details */}
       
-{/* Compact Qibla Details */}
-<div className="mt-3 grid shrink-0 grid-cols-2 gap-2">
 
-  {/* Qibla Bearing */}
-  <div className="rounded-xl border border-emerald-100/80 bg-white/90 px-3 py-2.5 text-center shadow-sm">
-    <p className="text-[9px] font-semibold tracking-wider text-zinc-400">
-      QIBLA BEARING
-    </p>
+{/* Centered Qibla Details */}
+<div className="mt-2 flex w-full shrink-0 justify-center">
+  <div className="w-fit rounded-xl border border-emerald-100/80 bg-white/90 px-3 py-1.5 shadow-sm">
+    <div className="grid grid-cols-2 divide-x divide-emerald-100">
 
-    <p className="mt-1 text-xl font-bold tabular-nums text-emerald-800">
-      {qibla !== null ? `${qibla.toFixed(1)}°` : "--"}
-    </p>
+      {/* Qibla Bearing */}
+      <div className="px-3 text-center">
+        <p className="text-[9px] font-semibold leading-tight tracking-wide text-zinc-400">
+          QIBLA BEARING
+        </p>
+        <p className="mt-0.5 text-lg font-bold tabular-nums text-emerald-800">
+          {qibla !== null ? `${qibla.toFixed(1)}°` : "--"}
+        </p>
+      </div>
+
+      {/* Distance to Makkah */}
+      <div className="px-3 text-center">
+        <p className="text-[9px] font-semibold leading-tight tracking-wide text-zinc-400">
+          DISTANCE TO MAKKAH
+        </p>
+        <p className="mt-0.5 text-lg font-bold tabular-nums text-emerald-800">
+          {distance !== null ? Math.round(distance).toLocaleString() : "--"}
+        </p>
+        <p className="text-[9px] leading-tight text-zinc-400">
+          Kilometers
+        </p>
+      </div>
+
+    </div>
   </div>
-
-  {/* Distance to Makkah */}
-  <div className="rounded-xl border border-emerald-100/80 bg-white/90 px-3 py-2.5 text-center shadow-sm">
-    <p className="text-[9px] font-semibold tracking-wider text-zinc-400">
-      DISTANCE TO MAKKAH
-    </p>
-
-    <p className="mt-1 text-xl font-bold tabular-nums text-emerald-800">
-      {distance !== null ? Math.round(distance).toLocaleString() : "--"}
-    </p>
-
-    <p className="text-[10px] text-zinc-400">Kilometers</p>
-  </div>
-
 </div>
+
 
 {/* Footer Message */}
 <div className="mt-3 rounded-xl border border-emerald-100/70 bg-gradient-to-br from-emerald-50/80 via-white to-amber-50/40 px-3 py-3 text-center shadow-sm">
