@@ -588,7 +588,7 @@ const disableCompass = () => {
       {/* Distance to Makkah */}
       <div className="px-3 text-center">
         <p className="text-[9px] font-semibold leading-tight tracking-wide text-zinc-400">
-          DISTANCE TO MAKKAH
+          Dis-to-Makkah
         </p>
         <p className="mt-0.5 text-lg font-bold tabular-nums text-emerald-800">
           {distance !== null ? Math.round(distance).toLocaleString() : "--"}
@@ -607,7 +607,7 @@ const disableCompass = () => {
 <div className="mt-3 rounded-xl border border-emerald-100/70 bg-gradient-to-br from-emerald-50/80 via-white to-amber-50/40 px-3 py-3 text-center shadow-sm">
 
   <p className="text-xs font-medium leading-relaxed text-emerald-800">
-    Wherever you are, let every prayer bring you closer to Allah.
+    Let every prayer bring you closer to Allah.
   </p>
 
  
