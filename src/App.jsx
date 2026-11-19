@@ -287,6 +287,57 @@ const App = () => {
     localStorage.setItem("calculationMethod", calculationMethod);
   }, [calculationMethod]);
 
+  // compass states
+  const [isSmallCompassActive, setIsSmallCompassActive] = useState(false);
+  const smallCompassListenerRef = useRef(null);
+  const smallCompassEventRef = useRef(null);
+
+  const enableSmallCompass = async () => {
+    try {
+      if (!window.DeviceOrientationEvent) {
+        throw new Error("Compass sensor is unavailable.");
+      }
+
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        const permission = await DeviceOrientationEvent.requestPermission();
+
+        if (permission !== "granted") {
+          throw new Error("Motion permission was denied.");
+        }
+      }
+
+      if (smallCompassListenerRef.current) return;
+
+      const eventName =
+        "ondeviceorientationabsolute" in window
+          ? "deviceorientationabsolute"
+          : "deviceorientation";
+
+      const handleOrientation = (event) => {
+        let heading = null;
+
+        if (typeof event.webkitCompassHeading === "number") {
+          heading = event.webkitCompassHeading;
+        } else if (typeof event.alpha === "number") {
+          heading = 360 - event.alpha;
+        }
+
+        if (heading !== null && Number.isFinite(heading)) {
+          setDeviceHeading(((heading % 360) + 360) % 360);
+        }
+      };
+
+      smallCompassListenerRef.current = handleOrientation;
+      smallCompassEventRef.current = eventName;
+
+      window.addEventListener(eventName, handleOrientation, true);
+      setIsSmallCompassActive(true);
+    } catch (error) {
+      console.error("Compass activation error:", error);
+      setDeviceHeading(null);
+    }
+  };
+
   // greetings
   const currentHour = new Date().getHours();
 
@@ -334,37 +385,50 @@ const App = () => {
   // One live compass heading shared by the small arrow and full Qibla compass.
   const normalizeDegrees = (value) => ((value % 360) + 360) % 360;
 
+   // ============================================================
+  // LIVE COMPASS SENSOR
+  // Automatically starts listening when the app has coordinates.
+  // The same heading is shared by the small Qibla arrow and
+  // the full Qibla compass.
+  // ============================================================
+
   useEffect(() => {
+    // Coordinates are required to calculate the Qibla direction.
     if (!activeCoordinates || typeof window === "undefined") return;
 
-    const normalize = (value) => ((value % 360) + 360) % 360;
-
+    // Check which orientation event the device supports.
     const eventName =
       "ondeviceorientationabsolute" in window
         ? "deviceorientationabsolute"
         : "deviceorientation";
 
+    // Receive the phone's orientation and calculate its heading.
     const handleOrientation = (event) => {
       let heading = null;
 
+      // iOS Safari provides a compass heading directly.
       if (typeof event.webkitCompassHeading === "number") {
         heading = event.webkitCompassHeading;
-      } else if (typeof event.alpha === "number") {
+      }
+      // Other supported devices provide the alpha orientation value.
+      else if (typeof event.alpha === "number") {
         heading = 360 - event.alpha;
       }
 
-      if (heading !== null) {
-        setDeviceHeading(normalize(heading));
+      // Normalize heading to a value between 0 and 359 degrees.
+      if (heading !== null && Number.isFinite(heading)) {
+        setDeviceHeading(normalizeDegrees(heading));
       }
     };
 
+    // Register the live orientation listener.
     window.addEventListener(eventName, handleOrientation, true);
 
+    // Remove the listener when coordinates change or App unmounts.
     return () => {
       window.removeEventListener(eventName, handleOrientation, true);
     };
   }, [activeCoordinates]);
-
   // Initial bearing from the selected location to the Kaaba.
   const getQiblaBearing = () => {
     if (!activeCoordinates) return null;
@@ -1818,8 +1882,6 @@ const App = () => {
           {/* Delicate certificate-style ornamental frame */}
           <div className="pointer-events-none absolute inset-2 rounded-[22px] border border-[#c5a45e]/50" />
 
-         
-       
           {/* Elegant Section Heading */}
 
           <div className="relative mb-6 overflow-hidden rounded-2xl border border-[#c5a45e]/50 bg-gradient-to-b from-[#fffdf8] to-[#f6efdf] px-5 py-7 text-center shadow-[0_5px_18px_rgba(139,107,50,0.10)]">
@@ -1929,88 +1991,80 @@ const App = () => {
                   title="Live Qibla direction — tap to open the full compass"
                   className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a66e28]"
                 >
-                 <div className="relative flex items-center justify-center">
+                  <div className="relative flex items-center justify-center">
+                    {/* Rotating arrow and Kaaba together */}
 
-  {/* Rotating arrow and Kaaba together */}
- 
-<div className="relative flex items-center justify-center">
+                    <div className="relative flex items-center justify-center">
+                      {/* Rotate the Kaaba and arrow together */}
+                      <div
+                        className="relative flex items-center justify-center"
+                        style={{
+                          transform: `rotate(${getCompassNeedleRotation()}deg)`,
+                          transformOrigin: "center center",
+                          transition: "transform 0.15s ease-out",
+                        }}
+                      >
+                        {/* Arrow */}
+                        {/* <Navigation
+                            className="YOUR_EXISTING_NAVIGATION_CLASSES"
+                          /> */}
 
- {/* Rotate the Kaaba and arrow together */}
-<div
-  className="relative flex items-center justify-center"
-  style={{
-    transform: `rotate(${getCompassNeedleRotation()}deg)`,
-    transformOrigin: "center center",
-    transition: "transform 0.15s ease-out",
-  }}
->
+                        {/* Single rotating Qibla arrow + Kaaba */}
+                        <div
+                          className="flex items-center justify-center"
+                          style={{
+                            transform: `rotate(${getCompassNeedleRotation() + 30}deg)`,
+                            transformOrigin: "center center",
+                            transition: "transform 0.15s ease-out",
+                          }}
+                        >
+                          <svg
+                            viewBox="0 0 100 145"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-10 w-8"
+                            style={{
+                              transform: `rotate(${getCompassNeedleRotation()}deg)`,
+                              transformOrigin: "center center",
+                              transition: "transform 0.15s ease-out",
+                            }}
+                          >
+                            <path
+                              d="M50 4 L88 65 L50 48 L12 65 Z"
+                              fill="#171717"
+                              stroke="#B58A36"
+                              strokeWidth="2"
+                              strokeLinejoin="round"
+                            />
 
+                            <path
+                              d="M8 76 L50 53 L92 76 L92 119 L50 143 L8 119 Z"
+                              fill="#171717"
+                              stroke="#B58A36"
+                              strokeWidth="2"
+                              strokeLinejoin="round"
+                            />
 
+                            <path
+                              d="M9 88 L50 111 L91 88"
+                              fill="none"
+                              stroke="#E5B83B"
+                              strokeWidth="6"
+                            />
 
-  {/* Arrow */}
-  {/* <Navigation
-    className="YOUR_EXISTING_NAVIGATION_CLASSES"
-  /> */}
-
-{/* Single rotating Qibla arrow + Kaaba */}
-<div
-  className="flex items-center justify-center"
-  style={{
-  transform: `rotate(${getCompassNeedleRotation() + 30}deg)`,
-  transformOrigin: "center center",
-  transition: "transform 0.15s ease-out",
-}}
->
-  <svg
-    viewBox="0 0 100 145"
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-10 w-8"
-  >
-    {/* Arrow pointing forward */}
-    <path
-      d="M50 4 L88 65 L50 48 L12 65 Z"
-      fill="#171717"
-      stroke="#B58A36"
-      strokeWidth="2"
-      strokeLinejoin="round"
-    />
-
-    {/* Kaaba body */}
-    <path
-      d="M8 76 L50 53 L92 76 L92 119 L50 143 L8 119 Z"
-      fill="#171717"
-      stroke="#B58A36"
-      strokeWidth="2"
-      strokeLinejoin="round"
-    />
-
-    {/* Golden belt */}
-    <path
-      d="M9 88 L50 111 L91 88"
-      fill="none"
-      stroke="#E5B83B"
-      strokeWidth="6"
-    />
-
-    {/* Kaaba door */}
-    <rect
-      x="64"
-      y="105"
-      width="10"
-      height="13"
-      fill="#D6AD50"
-      stroke="#A87922"
-      strokeWidth="1"
-    />
-  </svg>
-</div>
-</div>
-</div>
-
-
-
-
-</div>
+                            <rect
+                              x="64"
+                              y="105"
+                              width="10"
+                              height="13"
+                              fill="#D6AD50"
+                              stroke="#A87922"
+                              strokeWidth="1"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </button>
 
                 {/* Day and Hijri date */}
