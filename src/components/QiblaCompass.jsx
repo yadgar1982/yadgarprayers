@@ -629,12 +629,11 @@ const disableCompass = () => {
       </div>
 
 
-{/* Live Compass Toggle */}
-<div className="absolute left-4 top-3 z-50 flex items-center gap-2">
-  <span className="text-[10px] font-semibold tracking-wide text-zinc-100">
-    Enable Compass
-  </span>
 
+{/* Live Compass Toggle */}
+<div className="absolute left-4 top-3 z-50 flex items-center gap-3">
+
+  {/* Toggle first */}
   <button
     type="button"
     role="switch"
@@ -647,16 +646,22 @@ const disableCompass = () => {
         enableCompass();
       }
     }}
-    className={`relative h-5 w-9 rounded-full transition-colors duration-300 ${
-      active ? "bg-emerald-700" : "bg-zinc-300"
+    className={`relative h-6 w-11 rounded-full transition-colors duration-300 shadow-inner ${
+      active ? "bg-emerald-600" : "bg-zinc-400"
     }`}
   >
     <span
-      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
-        active ? "left-[18px]" : "left-0.5"
+      className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+        active ? "left-[22px]" : "left-0.5"
       }`}
     />
   </button>
+
+  {/* Text second */}
+  <span className="text-xs font-semibold tracking-wide text-zinc-100">
+    Enable Compass
+  </span>
+
 </div>
 
    
@@ -665,8 +670,8 @@ const disableCompass = () => {
 
   {/* Emerald light beam */}
   {aligned && (
-    <div className="qibla-connection-beam pointer-events-none absolute z-[25]" />
-  )}
+  <div className="qibla-connection-beam pointer-events-none absolute z-[25]" />
+)}
 
 
 {/* Qibla Status */}
@@ -702,7 +707,7 @@ const disableCompass = () => {
 </div>
 
 {/* Quranic Calligraphy - Always Visible */}
-<div className={`qibla-verse relative z-30 mb-3 w-full shrink-0 ${
+<div className={`qibla-verse relative z-20 mb-3 w-full shrink-0 ${
   aligned ? "qibla-verse-lit" : ""
 }`}>
   <img
