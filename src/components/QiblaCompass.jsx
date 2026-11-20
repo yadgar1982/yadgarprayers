@@ -711,7 +711,7 @@ const disableCompass = () => {
   aligned ? "qibla-verse-lit" : ""
 }`}>
   <img
-    src="/asset/qibla.png"
+    src="/assets/qibla.png"
     alt="Quranic Qibla verse"
     className="block  w-full rounded-xl object-contain"
   />
@@ -752,7 +752,7 @@ const disableCompass = () => {
       
 
 {/* Centered Qibla Details */}
-<div className="relative z-10 mt-2 flex w-full shrink-0 justify-center">
+<div className="relative z-10 mt-19 flex w-full shrink-0 justify-center">
   <div className="qibla-info mx-auto w-fit rounded-2xl px-4 py-2">
     <div className="grid grid-cols-2 divide-x divide-slate-100">
 
@@ -783,17 +783,6 @@ const disableCompass = () => {
   </div>
 </div>
 
-
-{/* Footer Message */}
-<div className="mt-3 rounded-xl border border-emerald-100/70 bg-gradient-to-br from-emerald-50/80 via-white to-amber-50/40 px-3 py-3 text-center shadow-sm">
-
-  <p className="text-xs font-medium leading-relaxed text-emerald-800">
-    Let every prayer bring you closer to Allah.
-  </p>
-
- 
-
-</div>
 
 
     
