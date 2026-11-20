@@ -1849,14 +1849,14 @@ const App = () => {
 
       {/* Qibla Compass Modal */}
       {activeSection === "qibla" && (
-       <div
-  className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-black/60 px-3 py-3 backdrop-blur-sm"
-  onClick={() => setActiveSection("")}
->
-  <div
-    className="relative h-[calc(100dvh-24px)] max-h-[850px] w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-2 shadow-2xl"
-    onClick={(e) => e.stopPropagation()}
-  >
+        <div
+          className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/60 px-3 py-3 backdrop-blur-sm"
+          onClick={() => setActiveSection("")}
+        >
+          <div
+            className="relative my-auto min-h-[500px] w-full max-w-md shrink-0 overflow-y-auto rounded-2xl bg-gradient-to-b from-[#fffdf6] to-[#f5efdf] p-2 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
               onClick={() => setActiveSection("")}
@@ -1883,7 +1883,7 @@ const App = () => {
           <div className="pointer-events-none absolute inset-2 rounded-[22px] border border-[#c5a45e]/50" />
 
           {/* Elegant Section Heading */}
-          <div className="relative mb-6 overflow-hidden rounded-2xl border border-[#c5a45e]/50 bg-gradient-to-b from-[#fffdf8] to-[#f6efdf] px-5 py-6 text-center shadow-[0_5px_18px_rgba(139,107,50,0.10)]">
+          <div className="relative mb-6 hidden overflow-hidden rounded-2xl border border-[#c5a45e]/50 bg-gradient-to-b from-[#fffdf8] to-[#f6efdf] px-5 py-6 text-center shadow-[0_5px_18px_rgba(139,107,50,0.10)] md:block">
             <div className="mb-3 flex items-center justify-center gap-3 text-xs font-medium tracking-[0.3em] text-[#a47c37]">
               <span className="h-px w-10 bg-[#c5a45e]/70" />
               <span>۞ YOUR DAILY WORSHIP ۞</span>
@@ -1903,6 +1903,8 @@ const App = () => {
               <span className="font-serif tracking-wide">Find Qibla</span>
             </button>
           </div>
+
+          {/* Loading State */}
 
           {/* Loading State */}
 
@@ -2545,7 +2547,7 @@ const App = () => {
               )}
 
               {/* MONTHLY QAMARI CALENDAR - RESPONSIVE */}
-              <section className=" overflow-hidden rounded-2xl border border-[#c5a45e]/70 bg-[#fffaf0] text-[#493a29] shadow-[0_8px_25px_rgba(23,75,58,0.12)]">
+              <section className=" overflow-hidden rounded-2xl mt-4 border border-[#c5a45e]/70 bg-[#fffaf0] text-[#493a29] shadow-[0_8px_25px_rgba(23,75,58,0.12)]">
                 <div className="bg-gradient-to-r from-[#174b3a] to-[#23634b] px-4 py-2 text-center text-[#fff4d7]">
                   <p className="text-[10px] font-semibold tracking-[0.28em] text-[#e3ca8d]">
                     ISLAMIC LUNAR CALENDAR
@@ -3348,7 +3350,7 @@ const App = () => {
       )}
 
       {/* Footer */}
-      <footer className="mt-12 border-t border-slate-200 bg-white px-6 py-6 text-center text-sm text-slate-500">
+      <footer className="mt- border-t border-slate-200 bg-white px-6 py-6 text-center text-sm text-slate-500">
         <p>For further connections, visit us at</p>
 
         <a
