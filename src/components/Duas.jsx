@@ -5,6 +5,8 @@ import {
   Copy,
   Check,
   X,
+  Activity,
+  BookOpen,
   RotateCcw,
   CheckCircle2,
   Sunrise,
@@ -298,7 +300,7 @@ const duas = [
   },
 
   {
-    id:29,
+    id: 29,
     category: ["morning", "evening", "all"],
     title: "",
     arabic:
@@ -392,23 +394,20 @@ export default function Duas() {
   }, []);
 
   useEffect(() => {
-  try {
-    const savedCounts = JSON.parse(
-      localStorage.getItem("yadgar-dua-counts") || "{}"
-    );
+    try {
+      const savedCounts = JSON.parse(
+        localStorage.getItem("yadgar-dua-counts") || "{}",
+      );
 
-    setDuaCounts(savedCounts);
-  } catch {
-    setDuaCounts({});
-  }
-}, []);
+      setDuaCounts(savedCounts);
+    } catch {
+      setDuaCounts({});
+    }
+  }, []);
 
-useEffect(() => {
-  localStorage.setItem(
-    "yadgar-dua-counts",
-    JSON.stringify(duaCounts)
-  );
-}, [duaCounts]);
+  useEffect(() => {
+    localStorage.setItem("yadgar-dua-counts", JSON.stringify(duaCounts));
+  }, [duaCounts]);
 
   // Get the current count for a Dua
   const getDuaCount = (dua) => duaCounts[dua.id] || 0;
@@ -495,7 +494,6 @@ useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
 
-
   const categories = [
     "morning",
     "evening",
@@ -503,9 +501,7 @@ useEffect(() => {
     "after Salat",
     "Quranic Duas",
   ];
-  
 
-   
   const filteredDuas = duas.filter((dua) => {
     const matchesCategory =
       activeCategory === "All" || dua.category.includes(activeCategory);
@@ -525,8 +521,6 @@ useEffect(() => {
 
     return matchesCategory && matchesSearch;
   });
-
-
 
   return (
     <section className="mx-auto w-full max-w-5xl px-3 py-6 sm:px-6">
@@ -559,120 +553,160 @@ useEffect(() => {
           </div>
 
           {/* Categories */}
-          <div className="mb-6 flex flex-wrap justify-center gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
-                className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
-                  activeCategory === category
-                    ? "border-[#174b3a] bg-[#174b3a] text-[#f4dfa9] shadow-md"
-                    : "border-[#c5a45e]/60 bg-white text-[#174b3a] hover:bg-[#f5eedc]"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+          <div className="mb-6 flex flex-wrap justify-center gap-2.5">
+  {categories.map((category) => {
+    const isActive = activeCategory === category;
+
+    return (
+      <button
+        key={category}
+        type="button"
+        onClick={() => setActiveCategory(category)}
+        className={`relative rounded-full border px-5 py-2 text-xs font-semibold capitalize tracking-wide transition-all duration-300 ${
+          isActive
+            ? "border-[#b9954e] bg-gradient-to-b from-[#205c46] to-[#123e30] text-[#f5e3b5] shadow-[0_4px_12px_rgba(23,75,58,0.22)] ring-1 ring-[#d6b76e]/30"
+            : "border-[#c5a45e]/60 bg-gradient-to-b from-[#fffdf7] to-[#f8f0df] text-[#24523e] shadow-[0_2px_5px_rgba(120,91,42,0.06)] hover:-translate-y-0.5 hover:border-[#b9954e] hover:from-[#f8efd9] hover:to-[#efe1bf] hover:shadow-md"
+        }`}
+      >
+        {category}
+      </button>
+    );
+  })}
+</div>
 
           {/* Morning and Evening Adhkar */}
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Morning Card */}
+            {/* Morning Adhkar */}
             <button
               type="button"
-             onClick={() => setActiveCategory("morning")}
-              className="group relative isolate min-h-[155px] overflow-hidden rounded-2xl border border-[#d7ad55] bg-gradient-to-br from-[#fff5d9] via-[#f5e4b8] to-[#e8c77e] p-5 text-left shadow-[0_5px_15px_rgba(126,91,32,0.16)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(126,91,32,0.25)] active:scale-[0.98]"
+              onClick={() => setActiveCategory("morning")}
+              className="group relative isolate min-h-[190px] overflow-hidden rounded-2xl border border-[#c9a45c] bg-gradient-to-br from-[#174b3b] via-[#1c6049] to-[#0d382d] p-5 text-left shadow-[0_7px_22px_rgba(20,65,48,0.22)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_13px_30px_rgba(20,65,48,0.32)] active:scale-[0.98]"
             >
-              {/* Decorative sunlight */}
-              <div className="pointer-events-none absolute -right-8 -top-12 -z-10 h-40 w-40 rounded-full bg-white/40 blur-2xl" />
-              <div className="pointer-events-none absolute -bottom-16 -left-10 -z-10 h-36 w-36 rounded-full bg-[#dba83e]/25 blur-2xl" />
+              {/* Subtle Islamic geometric texture */}
+              <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.12] [background-image:repeating-linear-gradient(45deg,transparent_0px,transparent_15px,#e5c77e_16px,transparent_17px),repeating-linear-gradient(-45deg,transparent_0px,transparent_15px,#e5c77e_16px,transparent_17px)]" />
 
-              <div className="flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/70 bg-white/55 text-[#a66d1e] shadow-sm backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-                  <Sunrise size={27} strokeWidth={1.6} />
+              {/* Decorative arch */}
+              <div className="pointer-events-none absolute -right-5 -top-16 z-0 h-64 w-48 rounded-t-full border border-[#d8b66d]/40 opacity-60" />
+              <div className="pointer-events-none absolute -right-1 -top-12 z-0 h-56 w-40 rounded-t-full border border-[#d8b66d]/30 opacity-60" />
+
+              {/* Inner gold frame */}
+              <div className="pointer-events-none absolute inset-2 z-0 rounded-xl border border-[#e5c77e]/25" />
+
+              {/* Decorative corner diamonds */}
+              <div className="pointer-events-none absolute left-4 top-4 z-10 h-2 w-2 rotate-45 border border-[#e7ca85]" />
+              <div className="pointer-events-none absolute right-4 top-4 z-10 h-2 w-2 rotate-45 border border-[#e7ca85]" />
+              <div className="pointer-events-none absolute bottom-4 left-4 z-10 h-2 w-2 rotate-45 border border-[#e7ca85]" />
+              <div className="pointer-events-none absolute bottom-4 right-4 z-10 h-2 w-2 rotate-45 border border-[#e7ca85]" />
+
+              {/* Golden glow */}
+              <div className="pointer-events-none absolute -right-12 -top-12 z-0 h-40 w-40 rounded-full bg-[#d8b66d]/15 blur-3xl transition-all duration-700 group-hover:scale-150" />
+
+              {/* Content */}
+              <div className="relative z-20 flex min-h-[150px] flex-col justify-between">
+                <div className="flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d8b66d]/60 bg-[#0b392d]/60 text-[#e8cc8c] shadow-inner transition-all duration-500 group-hover:scale-110 group-hover:border-[#f0d99e]">
+                    <Sunrise size={26} strokeWidth={1.5} />
+                  </div>
+
+                  <span className="rounded-full border border-[#d8b66d]/60 bg-[#0b392d]/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f0d99e]">
+                    Morning
+                  </span>
                 </div>
 
-                <span className="rounded-full border border-[#b68b3c]/30 bg-white/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#86601e]">
-                  Morning
-                </span>
-              </div>
+                <div className="mt-5 flex items-end justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-xl font-bold tracking-wide text-[#f5e6bd] drop-shadow-sm">
+                      Morning Adhkar
+                    </h3>
+                    <p className="mt-1 text-xs text-[#e5d9b9]">
+                      Begin your day with the remembrance of Allah
+                    </p>
+                    <p className="mt-3 text-[11px] font-semibold text-[#e8cc8c]">
+                      {
+                        duas.filter(
+                          (dua) =>
+                            Array.isArray(dua.schedule) &&
+                            dua.schedule.includes("morning"),
+                        ).length
+                      }{" "}
+                      Duas in this routine
+                    </p>
+                  </div>
 
-              <div className="mt-4 flex items-end justify-between gap-2">
-                <div>
-                  <h3 className="font-serif text-xl font-bold text-[#174b3a]">
-                    Morning Adhkar
-                  </h3>
-                  <p className="mt-1 text-xs text-[#785b2b]">
-                    Begin your day with the remembrance of Allah
-                  </p>
-                  <p className="mt-3 text-[11px] font-semibold text-[#896521]">
-                    {
-                      duas.filter(
-                        (dua) =>
-                          Array.isArray(dua.schedule) &&
-                          dua.schedule.includes("morning"),
-                      ).length
-                    }{" "}
-                    Duas in this routine
-                  </p>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#d8b66d]/60 bg-[#0b392d]/50 text-[#f0d99e] transition-all duration-300 group-hover:translate-x-1 group-hover:bg-[#d8b66d]/20">
+                    <ArrowRight size={18} />
+                  </span>
                 </div>
-
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#b68b3c]/40 bg-white/45 text-[#76551d] transition-all duration-300 group-hover:translate-x-1 group-hover:bg-white/80">
-                  <ArrowRight size={18} />
-                </span>
               </div>
             </button>
 
-            {/* Evening Card */}
+            {/* Evening Adhkar */}
             <button
               type="button"
-             onClick={() => setActiveCategory("evening")}
-              className="group relative isolate min-h-[155px] overflow-hidden rounded-2xl border border-[#9aafd0] bg-gradient-to-br from-[#e8effb] via-[#cbd9ef] to-[#aebfdf] p-5 text-left shadow-[0_5px_15px_rgba(42,66,111,0.16)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(42,66,111,0.25)] active:scale-[0.98]"
+              onClick={() => setActiveCategory("evening")}
+              className="group relative isolate min-h-[190px] overflow-hidden rounded-2xl border border-[#b9a16c] bg-gradient-to-br from-[#182c49] via-[#243c60] to-[#101d34] p-5 text-left shadow-[0_7px_22px_rgba(20,35,65,0.25)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_13px_30px_rgba(20,35,65,0.35)] active:scale-[0.98]"
             >
-              {/* Decorative moonlight */}
-              <div className="pointer-events-none absolute -right-8 -top-12 -z-10 h-40 w-40 rounded-full bg-white/50 blur-2xl" />
-              <div className="pointer-events-none absolute -bottom-16 -left-10 -z-10 h-36 w-36 rounded-full bg-[#718cb9]/25 blur-2xl" />
+              {/* Subtle Islamic geometric texture */}
+              <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.12] [background-image:repeating-linear-gradient(45deg,transparent_0px,transparent_15px,#d8bd80_16px,transparent_17px),repeating-linear-gradient(-45deg,transparent_0px,transparent_15px,#d8bd80_16px,transparent_17px)]" />
 
-              <div className="flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/70 bg-white/50 text-[#536c9b] shadow-sm backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-                  <MoonStar size={27} strokeWidth={1.6} />
+              {/* Decorative arch */}
+              <div className="pointer-events-none absolute -right-5 -top-16 z-0 h-64 w-48 rounded-t-full border border-[#d8bd80]/40 opacity-60" />
+              <div className="pointer-events-none absolute -right-1 -top-12 z-0 h-56 w-40 rounded-t-full border border-[#d8bd80]/30 opacity-60" />
+
+              {/* Inner gold frame */}
+              <div className="pointer-events-none absolute inset-2 z-0 rounded-xl border border-[#d8bd80]/25" />
+
+              {/* Decorative corner diamonds */}
+              <div className="pointer-events-none absolute left-4 top-4 z-10 h-2 w-2 rotate-45 border border-[#e4cf9d]" />
+              <div className="pointer-events-none absolute right-4 top-4 z-10 h-2 w-2 rotate-45 border border-[#e4cf9d]" />
+              <div className="pointer-events-none absolute bottom-4 left-4 z-10 h-2 w-2 rotate-45 border border-[#e4cf9d]" />
+              <div className="pointer-events-none absolute bottom-4 right-4 z-10 h-2 w-2 rotate-45 border border-[#e4cf9d]" />
+
+              {/* Moonlight glow */}
+              <div className="pointer-events-none absolute -right-12 -top-12 z-0 h-40 w-40 rounded-full bg-[#c6d4e9]/15 blur-3xl transition-all duration-700 group-hover:scale-150" />
+
+              {/* Content */}
+              <div className="relative z-20 flex min-h-[150px] flex-col justify-between">
+                <div className="flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d8bd80]/60 bg-[#101d34]/60 text-[#ead7a8] shadow-inner transition-all duration-500 group-hover:scale-110 group-hover:border-[#f0dfb5]">
+                    <MoonStar size={26} strokeWidth={1.5} />
+                  </div>
+
+                  <span className="rounded-full border border-[#d8bd80]/60 bg-[#101d34]/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#ead7a8]">
+                    Evening
+                  </span>
                 </div>
 
-                <span className="rounded-full border border-[#7188b1]/30 bg-white/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#53688f]">
-                  Evening
-                </span>
-              </div>
+                <div className="mt-5 flex items-end justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-xl font-bold tracking-wide text-[#f0e6d0] drop-shadow-sm">
+                      Evening Adhkar
+                    </h3>
+                    <p className="mt-1 text-xs text-[#d1d9e7]">
+                      End your day with peace and remembrance
+                    </p>
+                    <p className="mt-3 text-[11px] font-semibold text-[#ead7a8]">
+                      {
+                        duas.filter(
+                          (dua) =>
+                            Array.isArray(dua.schedule) &&
+                            dua.schedule.includes("evening"),
+                        ).length
+                      }{" "}
+                      Duas in this routine
+                    </p>
+                  </div>
 
-              <div className="mt-4 flex items-end justify-between gap-2">
-                <div>
-                  <h3 className="font-serif text-xl font-bold text-[#193b5c]">
-                    Evening Adhkar
-                  </h3>
-                  <p className="mt-1 text-xs text-[#526887]">
-                    End your day with peace and remembrance
-                  </p>
-                  <p className="mt-3 text-[11px] font-semibold text-[#526887]">
-                    {
-                      duas.filter(
-                        (dua) =>
-                          Array.isArray(dua.schedule) &&
-                          dua.schedule.includes("evening"),
-                      ).length
-                    }{" "}
-                    Duas in this routine
-                  </p>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#d8bd80]/60 bg-[#101d34]/50 text-[#ead7a8] transition-all duration-300 group-hover:translate-x-1 group-hover:bg-[#d8bd80]/20">
+                    <ArrowRight size={18} />
+                  </span>
                 </div>
-
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#7188b1]/40 bg-white/45 text-[#53688f] transition-all duration-300 group-hover:translate-x-1 group-hover:bg-white/80">
-                  <ArrowRight size={18} />
-                </span>
               </div>
             </button>
           </div>
 
           {/* Dua List with Individual Tasbeeh Counters */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             {filteredDuas.map((dua) => {
               const count = getDuaCount(dua);
               const completed = isCompleted(dua.id);
@@ -681,70 +715,182 @@ useEffect(() => {
               return (
                 <article
                   key={dua.id}
-                  className={`overflow-hidden rounded-2xl border p-4 shadow-sm transition-all duration-300 sm:p-5 ${
+                  className={`group relative overflow-hidden rounded-2xl border-[1.5px] border-[#c5a45e] transition-all duration-300 p-5 ${
                     completed
-                      ? "border-emerald-400 bg-emerald-50 shadow-[0_4px_18px_rgba(16,185,129,0.12)]"
-                      : "border-[#d8c69d] bg-white hover:shadow-md"
+                      ? "bg-[#f5fbf7] shadow-[0_5px_20px_rgba(16,185,129,0.08)]"
+                      : "bg-white shadow-[0_3px_12px_rgba(80,60,25,0.05)] hover:shadow-[0_8px_24px_rgba(80,60,25,0.09)]"
                   }`}
                 >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_125px] sm:items-center">
-                    {/* Dua content */}
-                    <div className="min-w-0">
-                      <div className="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 className="font-serif text-base font-semibold text-[#174b3a]">
-                          {dua.title || `Dua ${dua.id}`}
-                        </h3>
+                  {/* Subtle Islamic manuscript frame */}
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-[5px] z-0 rounded-[13px] border border-[#d8c69d]/60"
+                  />
 
-                        {completed && (
-                          <span className="flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-semibold text-white">
-                            <CheckCircle2 size={13} />
-                            Completed
-                          </span>
+                  {/* Elegant Islamic corner decoration */}
+                  <div
+                    className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl"
+                    aria-hidden="true"
+                  >
+                    {[
+                      "top-0 left-0",
+                      "top-0 right-0 -scale-x-100",
+                      "bottom-0 left-0 -scale-y-100",
+                      "bottom-0 right-0 -scale-100",
+                    ].map((position) => (
+                      <svg
+                        key={position}
+                        viewBox="0 0 90 90"
+                        className={`absolute h-12 w-12 sm:h-16 sm:w-16 ${position}`}
+                        fill="none"
+                      >
+                        <path
+                          d="M3 65 V25 Q3 3 25 3 H65"
+                          stroke="#c5a45e"
+                          strokeWidth="1.2"
+                        />
+                        <path
+                          d="M8 48 Q8 8 48 8"
+                          stroke="#c5a45e"
+                          strokeWidth="1"
+                        />
+                        <path
+                          d="M8 68 Q28 68 28 48 Q48 48 48 28 Q68 28 68 8"
+                          stroke="#b18b45"
+                          strokeWidth="1.2"
+                        />
+                        <path
+                          d="M18 28 L28 18 L38 28 L28 38 Z"
+                          stroke="#b18b45"
+                          strokeWidth="1"
+                        />
+                        <circle cx="28" cy="28" r="2.5" fill="#c5a45e" />
+                      </svg>
+                    ))}
+                  </div>
+
+                  <div className="p-4 sm:p-5">
+                    {/* Header */}
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f5eedc] text-[#987638]">
+                          <BookOpen size={16} />
+                        </div>
+
+                        <div>
+                          <h3 className="font-serif text-base font-bold tracking-wide text-[#174b3a]">
+                            {dua.title || `Dua ${dua.id}`}
+                          </h3>
+
+                          <p className="mt-0.5 text-[11px] text-[#9a8050]">
+                            {dua.category.join(", ")}
+                            <span className="mx-1.5">·</span>
+                            {dua.repeatCount} readings
+                          </p>
+                        </div>
+                      </div>
+
+                      {completed && (
+                        <span className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-bold tracking-wide text-emerald-700">
+                          <CheckCircle2 size={13} />
+                          Completed
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_125px] sm:items-center">
+                      {/* Arabic and Translation */}
+                      <div className="min-w-0">
+                        {/* Arabic Dua */}
+                        <div className="rounded-xl border border-[#eee4cf] bg-gradient-to-br from-[#fcfaf5] to-[#f8f3e8] px-4 py-5 sm:px-5 sm:py-6">
+                          <p
+                            dir="rtl"
+                            lang="ar"
+                            className="text-right font-serif text-[23px] leading-[2.15] text-[#174b3a] sm:text-[27px] sm:leading-[2.1]"
+                          >
+                            {dua.arabic}
+                          </p>
+                        </div>
+
+                        {/* Translation */}
+                        {dua.translation && (
+                          <div className="mt-3 rounded-lg border-l-[3px] border-[#c5a45e] bg-[#fbf9f3] px-3.5 py-3">
+                            <p className="text-sm leading-7 text-[#625947]">
+                              {dua.translation}
+                            </p>
+                          </div>
                         )}
                       </div>
 
-                      <p
-                        dir="rtl"
-                        className="text-right font-serif text-2xl leading-[2.1] text-[#174b3a] sm:text-3xl"
-                      >
-                        {dua.arabic}
-                      </p>
-
-                      {dua.translation && (
-                        <p className="mt-3 text-sm leading-7 text-[#625947]">
-                          {dua.translation}
-                        </p>
-                      )}
-
-                      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#8b6b32]">
-                        <span>{dua.category.join(", ")}</span>
-                        <span>·</span>
-                        <span>{dua.repeatCount} readings</span>
-                      </div>
-
-                      {/* Progress */}
-                      <div className="mt-4">
-                        <div className="mb-2 flex justify-between text-xs">
-                          <span className="font-medium text-[#174b3a]">
-                            Reading Progress
+                      {/* Tasbeeh Counter */}
+                      <div className="flex flex-row items-center justify-center gap-4 rounded-xl border border-[#eee4cf] bg-[#f8f5ed] p-3 sm:flex-col sm:gap-2.5 sm:py-5">
+                        <div className="text-center">
+                          <span className="block text-[10px] font-bold tracking-[0.2em] text-[#987638]">
+                            TASBEEH
                           </span>
-                          <span className="font-bold tabular-nums text-[#8b6b32]">
-                            {count} / {dua.repeatCount}
+
+                          <span className="mt-1 block text-[10px] text-[#a38b5e]">
+                            Tap to count
                           </span>
                         </div>
 
-                        <div className="h-2 overflow-hidden rounded-full bg-[#eee6d5]">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              completed ? "bg-emerald-600" : "bg-[#b18b45]"
-                            }`}
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCount(dua)}
+                          disabled={completed}
+                          aria-label={`Count reading ${count} of ${dua.repeatCount} for ${dua.title || `Dua ${dua.id}`}`}
+                          className={`relative flex h-[82px] w-[82px] shrink-0 flex-col items-center justify-center rounded-full border-[4px] border-[#d8b65d] shadow-[0_5px_16px_rgba(23,75,58,0.16)] transition-all duration-200 active:scale-95 sm:h-[96px] sm:w-[96px] ${
+                            completed
+                              ? "cursor-not-allowed bg-emerald-700 text-white"
+                              : "bg-gradient-to-br from-[#087a55] to-[#063b2e] text-white hover:scale-105 hover:shadow-[0_7px_20px_rgba(23,75,58,0.25)]"
+                          }`}
+                        >
+                          {completed ? (
+                            <CheckCircle2 size={30} />
+                          ) : (
+                            <span className="text-3xl font-bold tabular-nums">
+                              {count.toString().padStart(2, "0")}
+                            </span>
+                          )}
+
+                          <span className="mt-0.5 text-[9px] font-bold tracking-widest">
+                            {completed ? "DONE" : "TAP"}
+                          </span>
+                        </button>
+
+                        <span className="text-xs font-bold tabular-nums text-[#8b6b32]">
+                          {count} / {dua.repeatCount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Section */}
+                    <div className="mt-5 border-t border-[#eee6d5] pt-4">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-[#174b3a]">
+                          <Activity size={14} className="text-[#987638]" />
+                          Reading Progress
+                        </span>
+
+                        <span className="text-xs font-bold tabular-nums text-[#987638]">
+                          {count} / {dua.repeatCount}
+                        </span>
                       </div>
 
-                      {/* Card actions */}
-                      <div className="mt-4 flex flex-wrap gap-2">
+                      <div className="h-2 overflow-hidden rounded-full bg-[#eee6d5]">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            completed
+                              ? "bg-emerald-600"
+                              : "bg-gradient-to-r from-[#b18b45] to-[#d8b65d]"
+                          }`}
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+
+                      {/* Actions */}
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={() => copyDua(dua)}
@@ -764,9 +910,9 @@ useEffect(() => {
                               type="button"
                               onClick={() => undoCount(dua)}
                               disabled={count === 0}
-                              className="flex items-center gap-1.5 rounded-lg border border-[#d8c69d] px-3 py-2 text-xs font-semibold text-[#174b3a] transition hover:bg-[#f5eedc] disabled:opacity-40"
+                              className="flex items-center gap-1.5 rounded-lg border border-[#dfcfad] bg-white px-3 py-2 text-xs font-semibold text-[#587367] transition hover:bg-[#f5eedc] disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                              <RotateCcw size={14} />
+                              <RotateCcw size={13} />
                               Undo
                             </button>
 
@@ -774,7 +920,7 @@ useEffect(() => {
                               type="button"
                               onClick={() => resetCount(dua)}
                               disabled={count === 0}
-                              className="rounded-lg border border-[#d8c69d] px-3 py-2 text-xs font-semibold text-[#174b3a] transition hover:bg-[#f5eedc] disabled:opacity-40"
+                              className="rounded-lg border border-[#dfcfad] bg-white px-3 py-2 text-xs font-semibold text-[#587367] transition hover:bg-[#f5eedc] disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               Reset
                             </button>
@@ -785,53 +931,19 @@ useEffect(() => {
                             onClick={() => enableAgain(dua)}
                             className="flex items-center gap-1.5 rounded-lg bg-[#174b3a] px-3 py-2 text-xs font-semibold text-[#f4dfa9] transition hover:bg-[#063b2e]"
                           >
-                            <RotateCcw size={14} />
+                            <RotateCcw size={13} />
                             Enable Again
                           </button>
                         )}
                       </div>
 
                       {completed && (
-                        <p className="mt-3 text-xs font-medium text-emerald-700">
+                        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                          <CheckCircle2 size={14} />
                           Alhamdulillah! Completed. Highlight remains for one
                           hour.
                         </p>
                       )}
-                    </div>
-
-                    {/* Tasbeeh counter */}
-                    <div className="flex flex-row items-center justify-center gap-3 rounded-2xl bg-[#f7f3e9] p-3 sm:flex-col sm:gap-2">
-                      <span className="text-[10px] font-bold tracking-[0.18em] text-[#987638]">
-                        TASBEEH
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => handleCount(dua)}
-                        disabled={completed}
-                        aria-label={`Count reading ${count} of ${dua.repeatCount} for ${dua.title || `Dua ${dua.id}`}`}
-                        className={`relative flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-full border-[4px] border-[#d8b65d] shadow-[0_5px_15px_rgba(23,75,58,0.16)] transition active:scale-95 sm:h-24 sm:w-24 ${
-                          completed
-                            ? "cursor-not-allowed bg-emerald-700 text-white"
-                            : "bg-gradient-to-br from-[#087a55] to-[#063b2e] text-white hover:brightness-110"
-                        }`}
-                      >
-                        {completed ? (
-                          <CheckCircle2 size={30} />
-                        ) : (
-                          <span className="text-3xl font-bold tabular-nums">
-                            {count.toString().padStart(2, "0")}
-                          </span>
-                        )}
-
-                        <span className="mt-1 text-[9px] font-semibold tracking-wider">
-                          {completed ? "DONE" : "TAP"}
-                        </span>
-                      </button>
-
-                      <span className="text-xs font-semibold tabular-nums text-[#8b6b32]">
-                        {count} / {dua.repeatCount}
-                      </span>
                     </div>
                   </div>
                 </article>
@@ -839,7 +951,7 @@ useEffect(() => {
             })}
 
             {filteredDuas.length === 0 && (
-              <p className="py-10 text-center text-sm text-[#8b7955]">
+              <p className="rounded-xl border border-[#dfcfad] bg-white py-10 text-center text-sm text-[#8b7955]">
                 No duas found. Try another search.
               </p>
             )}
